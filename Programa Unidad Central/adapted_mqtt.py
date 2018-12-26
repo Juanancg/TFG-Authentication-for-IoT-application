@@ -2,8 +2,8 @@ import paho.mqtt.client as mqttclient
 
 Connected = False  # global variable for the state of the connection
 client = mqttclient.Client("Python")
-received_msg = ""
-flag_msg_received = 0
+strMessageReceived = ""
+bMessageReceived = False
 
 
 # Function needed to connect to the broker
@@ -24,11 +24,11 @@ def on_connect(client, userdata, flags, rc):
 # -----------------------------------------------------------------------------
 
 def on_message(client, userdata, message):
-    global flag_msg_received  # **** ESTO ES NUEVO Y NO ESTA PROBADO
-    flag_msg_received = 1  # **** ESTO ES NUEVO Y NO ESTA PROBADO
+    global bMessageReceived  # **** ESTO ES NUEVO Y NO ESTA PROBADO
+    bMessageReceived = True  # **** ESTO ES NUEVO Y NO ESTA PROBADO
     print("Mensaje recibido :", str(message.payload.decode("utf-8")))
-    global received_msg  # **** ESTO ES NUEVO Y NO ESTA PROBADO
-    received_msg = str(message.payload.decode("utf-8"))  # **** ESTO ES NUEVO Y NO ESTA PROBADO
+    global strMessageReceived  # **** ESTO ES NUEVO Y NO ESTA PROBADO
+    strMessageReceived = str(message.payload.decode("utf-8"))  # **** ESTO ES NUEVO Y NO ESTA PROBADO
 
 
 # Function that initializes the mqtt connection
