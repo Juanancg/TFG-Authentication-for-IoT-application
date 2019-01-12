@@ -1,10 +1,7 @@
 #ifndef HMACSHA256_H
 #define HMACSHA256_H
 
-
 #include "mbedtls/md.h"
-
-
 
 char hash[65];
 char codigo[5];
@@ -12,7 +9,7 @@ char codigo[5];
 char mensaje1[1000];
 
 char* strComputeHMAC(char* key, char* payload){
-	
+  
 	byte hmacResult[32];
 
 	mbedtls_md_context_t ctx;
@@ -31,44 +28,44 @@ char* strComputeHMAC(char* key, char* payload){
 		char str[3];
 		int x = 0;
 		sprintf(str, "%02x", (int)hmacResult[i]);
-		
-		if(i==0){strcpy(mensaje1,str);}
-		else{
-			strcat(mensaje1, str);
+
+		if(i==0){
+			strcpy(mensaje1,str);
+
+		}else{
+		  strcat(mensaje1, str);
 		}
 	}
-	
+
 	return (mensaje1);
 
 }
 
 char* strGetMessageFromRaw(char* msg_ds){ //ds=digital signature
-	
+  
 	int longitud = strlen(msg_ds);
-	
-	for(int i = 64; i < longitud+1 ; i++){
-		
-		codigo[i-64]=msg_ds[i];
 
-	}	
-	
+	for(int i = 64; i < longitud+1 ; i++){
+		codigo[i-64]=msg_ds[i];
+	} 
+
 	return(codigo);
-		
+    
 }
 
 
 char* get_digital_sig(char* payload1){
-	
-	
+
 	int longitud = strlen(payload1);
-	
-	if (longitud<65) {return 0;}
-	else{
-	
+
+	if (longitud<65) {
+		return 0;
+
+	} else{
 		for(int i=0; i<64;i++){
-			
 			hash[i]=payload1[i];
-		}	
+		} 
+
 		hash[65]='\0';
 		return(hash);
 	}
@@ -77,10 +74,9 @@ char* get_digital_sig(char* payload1){
 bool comparacion(char *primero, char *segundo){
 
 	for(int i = 0; i < 64; i++){
-		
 		if( primero[i] != segundo[i]) return false;
 	}
-	return true;	
+	return true;  
 }
 
 

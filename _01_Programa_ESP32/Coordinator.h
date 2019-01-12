@@ -81,16 +81,22 @@ class Coordinator {
     	***************************************************************************************************/    
 		bool bCheckAuth(char *mensaje_to_check) {
 
-		    char *strHMACReceived;
-		    char *strHMACReal;
-			/* EXTRAEMOS LA FIRMA DIGITAL */
-			strHMACReceived = get_digital_sig(mensaje_to_check);
+	      	if(strlen(mensaje_to_check) > 64){
+				char *strHMACReceived;
+				//char strHMACReceived[]="hreakds";
+				char *strHMACReal;
+				/* EXTRAEMOS LA FIRMA DIGITAL */
+				strHMACReceived = get_digital_sig(mensaje_to_check);
 
-			/* GENERAMOS LA FIRMA DIGITAL QUE DEBERÍA SER */
-			strHMACReal  = strComputeHMAC(key, strGetMessageFromRaw(mensaje_to_check));
+				/* GENERAMOS LA FIRMA DIGITAL QUE DEBERÍA SER */
+				strHMACReal = strComputeHMAC(key, "PING" /*strGetMessageFromRaw(mensaje_to_check)*/);
 
-			/* COMPARAMOS AMBAS FIRMAS */
-			return comparacion(strHMACReceived, strHMACReal);
+				/* COMPARAMOS AMBAS FIRMAS */
+				return comparacion(strHMACReceived, strHMACReal);
+
+			} else{
+				return false;
+			}
 		}
 		
        	/*********************************************FUNCTION******************************************//**
@@ -142,7 +148,7 @@ class Coordinator {
 				if (bCheckAuth(client.mensaje_inicial)){
 					switch(iMessageType(strGetMessageFromRaw(client.mensaje_inicial))){
 						case 1:
-           Serial.println("Switch de Ping");
+           					Serial.println("Switch de Ping");
 						    sendPingMessage();
 						    break;
 					  	case 2:
@@ -162,7 +168,7 @@ class Coordinator {
 
 		int iMessageType(char* message){
 			if(strcmp(message,"PING")==0){
-        Serial.println("Tipo de mensaje de Ping");
+        		Serial.println("Tipo de mensaje de Ping");
 				return 1;
 				/*mensaje = compute_HMAC(key,ping_msg);
 				strcat(mensaje,ping_msg);
