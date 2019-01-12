@@ -2,13 +2,19 @@
 # IMPORTS
 # -----------------------------------------------------------------------------
 import Coordinator as CoordinatorClass
+import hmacSha256 as hmacSha256
 
-Connected = False  # global variable for the state of the connection
+data = "{\"STATUS\":{\"PHOTODIODE\":4095,\"FDC\":{\"FDC_O\":1,\"FDC_C\":0},\"ANGLE\":{\"X_AXIS\":-0.54,\"Y_AXIS\":-0.13,\"Z_AXIS\":0.77}}}"
+
+
 coordinator = CoordinatorClass.Coordinator()
 
-# print(coordinator.b_init_mqtt())
+# Init MQTT broker
+coordinator.b_init_mqtt()
 
-sUserPetition = coordinator.s_user_petition()
+coordinator.petition_manager()
+
+
 
 
 # -----------------------------------------------------------------------------

@@ -80,7 +80,7 @@ class Coordinator {
     	*	\return true if is authentic false if not
     	***************************************************************************************************/    
 		bool bCheckAuth(char *mensaje_to_check) {
-
+			// If the message lenght is less than 64, the message doesnt have the HMAC
 	      	if(strlen(mensaje_to_check) > 64){
 				char *strHMACReceived;
 				//char strHMACReceived[]="hreakds";
@@ -89,7 +89,7 @@ class Coordinator {
 				strHMACReceived = get_digital_sig(mensaje_to_check);
 
 				/* GENERAMOS LA FIRMA DIGITAL QUE DEBERÍA SER */
-				strHMACReal = strComputeHMAC(key, "PING" /*strGetMessageFromRaw(mensaje_to_check)*/);
+				strHMACReal = strComputeHMAC(key, strGetMessageFromRaw(mensaje_to_check));
 
 				/* COMPARAMOS AMBAS FIRMAS */
 				return comparacion(strHMACReceived, strHMACReal);

@@ -1,5 +1,7 @@
 import paho.mqtt.client as mqttclient
 
+
+
 Connected = False  # global variable for the state of the connection
 client = mqttclient.Client("Python")
 strMessageReceived = ""
