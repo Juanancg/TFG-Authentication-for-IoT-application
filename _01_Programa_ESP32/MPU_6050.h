@@ -9,6 +9,7 @@
 #define MPU6050_ACCEL_CONFIG 0x1c
 #define MPU6050_WHO_AM_I     0x75
 #define MPU6050_PWR_MGMT_1   0x6b
+
 class MPU_6050: public Sensor{
 	private:
 	

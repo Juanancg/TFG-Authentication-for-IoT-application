@@ -5,12 +5,37 @@
 class Final_de_carrera: public Sensor{
 
 	public:
+
+		/*********************************************CONSTRUCTOR***************************************//**
+    	***************************************************************************************************/ 
+		Final_de_carrera(){
+
+		}
+
+		/*********************************************CONSTRUCTOR***************************************//**
+		*	\brief
+    	***************************************************************************************************/ 
 		Final_de_carrera(int pin1){
 			pin=pin1;
-			pinMode(pin,INPUT_PULLUP);
+			pinMode(pin, INPUT);
 		}
+
+		/*********************************************FUNCTION******************************************//**
+    	*	\brief Function that sets the pin of the Limit Switch and configures the specified pin to 
+    	*			behave as an Input pullup
+    	*	\return None
+    	***************************************************************************************************/ 
+		void set_pin(int x){
+			pin = x;
+			pinMode(pin, INPUT);
+		}
+
+		/*********************************************FUNCTION******************************************//**
+    	*	\brief Function that reads the value of the Limit Switch and returns it
+    	*	\return value
+    	***************************************************************************************************/ 
 		int get_value(){
-			value=digitalRead(pin);
+			value = digitalRead(pin);
 			return (value);
 		}
 };

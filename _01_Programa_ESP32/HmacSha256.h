@@ -11,8 +11,7 @@ char codigo[5];
 
 char mensaje1[1000];
 
-char* compute_HMAC(char* key, char* payload){
-	
+char* strComputeHMAC(char* key, char* payload){
 	
 	byte hmacResult[32];
 
@@ -21,7 +20,6 @@ char* compute_HMAC(char* key, char* payload){
 
 	const size_t payloadLength = strlen(payload);
 	const size_t keyLength = strlen(key);            
-
 	mbedtls_md_init(&ctx);
 	mbedtls_md_setup(&ctx, mbedtls_md_info_from_type(md_type), 1);
 	mbedtls_md_hmac_starts(&ctx, (const unsigned char *) key, keyLength);
@@ -29,8 +27,6 @@ char* compute_HMAC(char* key, char* payload){
 	mbedtls_md_hmac_finish(&ctx, hmacResult);
 	mbedtls_md_free(&ctx);
 
-
-	
 	for(int i = 0; i< sizeof(hmacResult); i++){
 		char str[3];
 		int x = 0;
@@ -40,16 +36,13 @@ char* compute_HMAC(char* key, char* payload){
 		else{
 			strcat(mensaje1, str);
 		}
-	  
 	}
-	
-	
 	
 	return (mensaje1);
 
 }
 
-char* get_msg(char* msg_ds){ //ds=digital signature
+char* strGetMessageFromRaw(char* msg_ds){ //ds=digital signature
 	
 	int longitud = strlen(msg_ds);
 	

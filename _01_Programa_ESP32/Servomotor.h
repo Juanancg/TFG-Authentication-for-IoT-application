@@ -13,16 +13,26 @@ class Servomotor: public Sensor{
 		
 			pin = servo_pin;			
 		}
-		
-		void setup(){
-		
-			myservo.attach(pin); 
+
+		Servomotor(){
+
 		}
 		
+		void set_pin(int x){
+			pin = x;
+			sensor_apertura.set_pin(4);
+			sensor_cierre.set_pin(5);
+		}
+
+		void setup(){
+			myservo.attach(pin); 
+		}
+
+		
 		void write(int value_to_move){
-			
 			value = value_to_move;
 			myservo.write(value);
+			Serial.println("He movido el servo");
 		}
 		
 		int get_value(){
