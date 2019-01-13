@@ -6,14 +6,16 @@
 #include "HmacSha256.h"
 #include "MPU_6050.h"
 #include "Servomotor.h"
-#include "HmacSha256.h"
 #include "WiFi_MQTT.h"
+
+#include <string>
 
 
 class Coordinator {
 
 	private:
-		char JSONmessageBuffer[150];
+		HmacSha256 crypto;
+		char JSONmessageBuffer[250];
 	    /* WiFi */
 	    const char* ssid = "TP-LINK_F3200A";
 	    const char* password =  "43491896";
@@ -79,16 +81,20 @@ class Coordinator {
 		bool bCheckAuth(char *mensaje_to_check) {
 			// If the message lenght is less than 64, the message doesnt have the HMAC
 	      	if(strlen(mensaje_to_check) > 64){
-				char *strHMACReceived;
-				char *strHMACReal;
-				/* EXTRAEMOS LA FIRMA DIGITAL */
-				strHMACReceived = get_digital_sig(mensaje_to_check);
 
+				char* strHMACReceived;
+				char* strHMACReal;
+				/* EXTRAEMOS LA FIRMA DIGITAL */
+				strHMACReceived = crypto.get_digital_sig(mensaje_to_check);
+	      		Serial.print("HMAC RECIBIDO: ");
+	      		Serial.println(strHMACReceived);
 				/* GENERAMOS LA FIRMA DIGITAL QUE DEBERÍA SER */
-				strHMACReal = strComputeHMAC(key, strGetMessageFromRaw(mensaje_to_check));
+				strHMACReal = crypto.strComputeHMAC(key, crypto.strGetMessageFromRaw(mensaje_to_check));
+	      		Serial.print("HMAC supuesto: ");
+	      		Serial.println(strHMACReal);
 
 				/* COMPARAMOS AMBAS FIRMAS */
-				return comparacion(strHMACReceived, strHMACReal);
+				return crypto.comparacion(strHMACReceived, strHMACReal);
 
 			} else{
 				return false;
@@ -101,6 +107,7 @@ class Coordinator {
     	***************************************************************************************************/ 
 		char * strGetValuesComposeJSON(){
   		    
+  		    memset(JSONmessageBuffer, 0, strlen(JSONmessageBuffer));
 			StaticJsonBuffer<300> JSONbuffer;
 			JsonObject& JSONStatus = JSONbuffer.createObject();
 			JsonObject& JSONStatusContent = JSONbuffer.createObject();
@@ -132,7 +139,7 @@ class Coordinator {
 			if(client.flag_msg_recibido){
 				client.flag_msg_recibido = 0;
 				if (bCheckAuth(client.mensaje_inicial)){
-					switch(iMessageType(strGetMessageFromRaw(client.mensaje_inicial))){
+					switch(iMessageType(crypto.strGetMessageFromRaw(client.mensaje_inicial))){
 						case 1:
 						// PING CASE
 						    sendPingMessage();
@@ -147,6 +154,7 @@ class Coordinator {
 					}
 
 				} else{
+
 					Serial.println("El mensaje no es autentico");
 				}
 			}
@@ -169,17 +177,14 @@ class Coordinator {
 		}
 
 		void sendPingMessage(){
-			client.MQTTClient.publish("esp/responses", strcat(strComputeHMAC(key,"PING"),"PING"));
+			client.MQTTClient.publish("esp/responses", strcat(crypto.strComputeHMAC(key,"PING"),"PING"));
 			Serial.println("Mensaje de PING enviado");
 		}
 
 		void sendStatusMessage(){
-			char *messageJSON;
-			messageJSON = strGetValuesComposeJSON();
-			char * hmacgenerated = strcat(strComputeHMAC(key,messageJSON), messageJSON);
-
-			client.MQTTClient.publish("esp/responses", hmacgenerated);
-			Serial.println("Mensaje de STATUS enviado: ");
+			char * messageJSON = strGetValuesComposeJSON();
+			client.MQTTClient.publish("esp/responses", strcat(crypto.strComputeHMAC(key, messageJSON), messageJSON));
+			Serial.println("Mensaje de STATUS enviado");
 		}
 
 };

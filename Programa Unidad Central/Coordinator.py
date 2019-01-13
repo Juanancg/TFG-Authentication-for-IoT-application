@@ -106,6 +106,7 @@ class Coordinator:
             return True
         else:
             # Message no authentic
+            print("Mensaje no autentico")
             return False
 
     # -----------------------------------------------------------------------------
@@ -117,11 +118,11 @@ class Coordinator:
         # Save values to check
         try:
             self.photodiodeValue = decoded["STATUS"]["PHOTODIODE"]
-            self.fdcOpenValue = decoded["STATUS"]["FDC"]["FDC_O"]
-            self.fdcClosedValue = decoded["STATUS"]["FDC"]["FDC_C"]
-            self.axisXValue = decoded["STATUS"]["ANGLE"]["X_AXIS"]
-            self.axisYValue = decoded["STATUS"]["ANGLE"]["Y_AXIS"]
-            self.axisZValue = decoded["STATUS"]["ANGLE"]["Z_AXIS"]
+            self.fdcOpenValue = decoded["STATUS"]["LimitSwitch"]["LimitSwitch_O"]
+            self.fdcClosedValue = decoded["STATUS"]["LimitSwitch"]["LimitSwitch_C"]
+            self.axisXValue = decoded["STATUS"]["ANGLES"]["X_AXIS"]
+            self.axisYValue = decoded["STATUS"]["ANGLES"]["Y_AXIS"]
+            self.axisZValue = decoded["STATUS"]["ANGLES"]["Z_AXIS"]
             return 1
         # Interruption if cant read any parameter of JSON msg
         except KeyError:
@@ -140,20 +141,21 @@ class Coordinator:
     # Function that analyzes the values of status msg and compose external msg
     # -----------------------------------------------------------------------------
     def compose_status(self):
+        #strMessageStatusToShow1 = ""
         # Check if it can read JSON message
         if self.decode_Status_msg(self.strMessage) == 1:
-            self.strMessageStatusToShow = "STATUS: \n"
-            self.strMessageStatusToShow = self.strMessageStatusToShow + "Photodiode Value: " + str(self.photodiodeValue)
+            strMessageStatusToShow1 = "STATUS: \n"
+            strMessageStatusToShow1 = strMessageStatusToShow1 + "Photodiode Value: " + str(self.photodiodeValue)
             if self.analyze_Photodiode_Value(self.photodiodeValue):
-                self.strMessageStatusToShow = self.strMessageStatusToShow + " - Invalid to open the cap"
+                strMessageStatusToShow1 = strMessageStatusToShow1 + " - Invalid to open the cap"
             else:
-                self.strMessageStatusToShow = self.strMessageStatusToShow + " - Valid to open the cap"
-            self.strMessageStatusToShow = self.strMessageStatusToShow + "\nOpen: " + str(self.fdcOpenValue) + \
+                strMessageStatusToShow1 = strMessageStatusToShow1 + " - Valid to open the cap"
+            strMessageStatusToShow1 = strMessageStatusToShow1 + "\nOpen: " + str(self.fdcOpenValue) + \
                                           "\nClosed: " + str(self.fdcClosedValue) + "\nX Axis: " + \
                                           str(self.axisXValue) + "\nY Axis: " + str(self.axisYValue) + \
                                           "\nZ Axis: " + str(self.axisZValue)
 
-            return self.strMessageStatusToShow 
+            return strMessageStatusToShow1
         else:
             return "Cant read JSON msg"
 
@@ -192,4 +194,8 @@ class Coordinator:
                     self.mqtt.send_message('GETSTATUS')
                     if self.expected_message(definesValues.MSG_TYPE_STATUS) == 1:
                         print(self.compose_status())
+                    else:
+                        print("Mensaje no esperado - No STATUS")
+                else:
+                    print ("Mensjae no esperado - No PING")
 
