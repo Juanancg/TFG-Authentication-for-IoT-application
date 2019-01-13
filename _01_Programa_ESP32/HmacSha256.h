@@ -3,13 +3,14 @@
 
 #include "mbedtls/md.h"
 
-char hash[65];
-char codigo[5];
 
-char mensaje1[1000];
+
+char hash[65];
+char message[12];
+char mensaje1[65];
 
 char* strComputeHMAC(char* key, char* payload){
-  
+
 	byte hmacResult[32];
 
 	mbedtls_md_context_t ctx;
@@ -42,14 +43,15 @@ char* strComputeHMAC(char* key, char* payload){
 }
 
 char* strGetMessageFromRaw(char* msg_ds){ //ds=digital signature
-  
+	
+	memset(message, 0, strlen(message));
 	int longitud = strlen(msg_ds);
 
 	for(int i = 64; i < longitud+1 ; i++){
-		codigo[i-64]=msg_ds[i];
+		message[i-64]=msg_ds[i];
 	} 
-
-	return(codigo);
+	message[longitud-64] = '\0';
+	return(message);
     
 }
 

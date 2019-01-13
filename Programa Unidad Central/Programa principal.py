@@ -11,9 +11,13 @@ coordinator = CoordinatorClass.Coordinator()
 
 # Init MQTT broker
 coordinator.b_init_mqtt()
+try:
+    while 1:
+        coordinator.petition_manager()
 
-coordinator.petition_manager()
-
+except KeyboardInterrupt:
+    print('Desconectado')
+    coordinator.mqtt.disconnect()
 
 
 

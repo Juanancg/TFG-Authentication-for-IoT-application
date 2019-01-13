@@ -13,10 +13,7 @@
 class Coordinator {
 
 	private:
-		char *ping_msg;
-    
-	    char JSONmessageBuffer[150];
-	    
+		char JSONmessageBuffer[150];
 	    /* WiFi */
 	    const char* ssid = "TP-LINK_F3200A";
 	    const char* password =  "43491896";
@@ -83,7 +80,6 @@ class Coordinator {
 			// If the message lenght is less than 64, the message doesnt have the HMAC
 	      	if(strlen(mensaje_to_check) > 64){
 				char *strHMACReceived;
-				//char strHMACReceived[]="hreakds";
 				char *strHMACReal;
 				/* EXTRAEMOS LA FIRMA DIGITAL */
 				strHMACReceived = get_digital_sig(mensaje_to_check);
@@ -100,21 +96,11 @@ class Coordinator {
 		}
 		
        	/*********************************************FUNCTION******************************************//**
-    	*	\brief Function that gets the message from the HMAC+Message and desactivates the flag of msg 
-    	*		   received
-    	*	\return message 
-    	***************************************************************************************************/ 
-		char* strGetMessage(char* strhmacMessage){ // TODO - Posiblemente quitar
-			// client.flag_msg_recibido = 0;
-			return strGetMessageFromRaw(strhmacMessage);
-		}
-
-       	/*********************************************FUNCTION******************************************//**
     	*	\brief Function that get the values of the components of the system and composes a JSON msg
     	*	\return JSON message 
     	***************************************************************************************************/ 
 		char * strGetValuesComposeJSON(){
-		  
+  		    
 			StaticJsonBuffer<300> JSONbuffer;
 			JsonObject& JSONStatus = JSONbuffer.createObject();
 			JsonObject& JSONStatusContent = JSONbuffer.createObject();
@@ -148,11 +134,12 @@ class Coordinator {
 				if (bCheckAuth(client.mensaje_inicial)){
 					switch(iMessageType(strGetMessageFromRaw(client.mensaje_inicial))){
 						case 1:
-           					Serial.println("Switch de Ping");
+						// PING CASE
 						    sendPingMessage();
 						    break;
 					  	case 2:
-						    // statements
+					  	// GET STATUS CASE
+						    sendStatusMessage();
 						    break;
 					  	default:
 						    // statements
@@ -168,18 +155,13 @@ class Coordinator {
 
 		int iMessageType(char* message){
 			if(strcmp(message,"PING")==0){
-        		Serial.println("Tipo de mensaje de Ping");
+        		Serial.println("Tipo de mensaje recibido de Ping");
 				return 1;
-				/*mensaje = compute_HMAC(key,ping_msg);
-				strcat(mensaje,ping_msg);
-				client->publish("esp/responses", mensaje);
-				Serial.println("El mensaje es PING");*/
-			}else if(strcmp(message,"GET")==0){
-				/*mensaje_get = get_values_to_json(servo, sensor, fotodiodo); // ********* TODO ESTO
-				mensaje = compute_HMAC(key,mensaje_get);
-				strcat(mensaje,mensaje_get);
-				client->publish("esp/responses", mensaje);*/
-				return 1;
+
+			}else if(strcmp(message,"GETSTATUS")==0){
+				Serial.println("Tipo de mensaje recibido de Get Status");
+				return 2;
+
 			} else{
 				return 0;
 			}
@@ -188,7 +170,16 @@ class Coordinator {
 
 		void sendPingMessage(){
 			client.MQTTClient.publish("esp/responses", strcat(strComputeHMAC(key,"PING"),"PING"));
-			Serial.println("El mensaje es PING");
+			Serial.println("Mensaje de PING enviado");
+		}
+
+		void sendStatusMessage(){
+			char *messageJSON;
+			messageJSON = strGetValuesComposeJSON();
+			char * hmacgenerated = strcat(strComputeHMAC(key,messageJSON), messageJSON);
+
+			client.MQTTClient.publish("esp/responses", hmacgenerated);
+			Serial.println("Mensaje de STATUS enviado: ");
 		}
 
 };

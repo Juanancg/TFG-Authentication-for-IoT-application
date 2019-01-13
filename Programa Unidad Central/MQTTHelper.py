@@ -29,9 +29,10 @@ class MQTTHelper:
     # Function called when a message arrives
     # -----------------------------------------------------------------------------
     def on_message(self, client, userdata, message):
-        self.bMessageReceived = True  # **** ESTO ES NUEVO Y NO ESTA PROBADO
+        self.bMessageReceived = True
+        self.strMessageReceived = ""
         print("Mensaje recibido :", str(message.payload.decode("utf-8")))
-        self.strMessageReceived = str(message.payload.decode("utf-8"))  # **** ESTO ES NUEVO Y NO ESTA PROBADO
+        self.strMessageReceived = str(message.payload.decode("utf-8"))
 
     # -----------------------------------------------------------------------------
     # Function that initializes the mqtt connection

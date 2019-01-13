@@ -1,6 +1,7 @@
 #include <WiFi.h>
 #include "HmacSha256.h"
 #include <PubSubClient.h>
+#define MQTT_MAX_PACKET_SIZE 1024
 
 
 

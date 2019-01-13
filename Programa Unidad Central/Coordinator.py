@@ -74,10 +74,11 @@ class Coordinator:
         return self.sUserPetition
 
     # -----------------------------------------------------------------------------
-    # Function that checks the authentity reads message and clasifies it
+    # Function that checks the authenticity reads message and clasifies it
     # -----------------------------------------------------------------------------
     def message_reader(self, raw_message):
         # 1 - Check authentication
+        self.strMessage = ""
         if hmacSha256.check_authentication(raw_message, "secretKey"):
             self.strMessage = hmacSha256.get_msg(raw_message)
 
