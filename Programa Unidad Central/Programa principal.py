@@ -3,7 +3,18 @@
 # -----------------------------------------------------------------------------
 import Coordinator as CoordinatorClass
 import hmacSha256 as hmacSha256
+import StateMachine as StateMachine
+import time
 
+stateMachine = StateMachine.StateMachine()
+while True:
+    stateMachine.StartStateMachine()
+    time.sleep(0.5)
+
+
+
+
+"""
 data = "{\"STATUS\":{\"PHOTODIODE\":4095,\"FDC\":{\"FDC_O\":1,\"FDC_C\":0},\"ANGLE\":{\"X_AXIS\":-0.54,\"Y_AXIS\":-0.13,\"Z_AXIS\":0.77}}}"
 
 
@@ -17,7 +28,7 @@ try:
 
 except KeyboardInterrupt:
     print('Desconectado')
-    coordinator.mqtt.disconnect()
+    coordinator.mqtt.disconnect()"""
 
 
 

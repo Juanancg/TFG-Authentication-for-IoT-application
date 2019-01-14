@@ -4,6 +4,7 @@
 import paho.mqtt.client as mqtt_client
 import hmacSha256 as hmacSha256
 import time
+import Defines as definesValues
 
 
 class MQTTHelper:
@@ -62,17 +63,23 @@ class MQTTHelper:
         return 1  # TODO - Retornar TRUE o FALSE en funcion si ha podido envair el mensaje o no (Mirar paho)
 
     # -----------------------------------------------------------------------------
-    # Function that manages messages timeouts and saves the message received
+    #   \brief Function that manages messages timeouts and saves the message received
+    #   \return True if it receives msg, false if reach timeout
     # -----------------------------------------------------------------------------
     def wait_message(self):
         print("Waiting for response")
-        while not self.bMessageReceived:
-            # print(".")
+        count = 0
+        while (count < definesValues.MSG_TIMEOUT) and (not self.bMessageReceived):
             time.sleep(0.5)
-        # .strTempMsgHashed = self.mqtt.strMessageReceived
-        # print(self.strMessageReceived)
+            count += 0.5
+
         self.bMessageReceived = False
-        return 1  # TODO - Return true or false based on Timeouts
+        if count >= definesValues.MSG_TIMEOUT:
+            print ("count > 60")
+            return False
+
+        return True
+
 
     # -----------------------------------------------------------------------------
     # Function that returns raw message
@@ -88,3 +95,5 @@ class MQTTHelper:
         self.Connected = False
         self.client.disconnect()
         self.client.loop_stop()
+
+

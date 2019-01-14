@@ -47,7 +47,7 @@ public:
 
 	}
 
-	char* strGetMessageFromRaw(char* msg_ds){ //ds=digital signature
+	char* strGetMessageFromRaw(char* msg_ds){ // ds = digital signature
 		
 		
 		memset(message, 0, strlen(message));

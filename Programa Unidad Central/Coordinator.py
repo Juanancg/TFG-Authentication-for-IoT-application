@@ -42,10 +42,15 @@ class Coordinator:
         self.axisYValue = 0.0
         self.axisZValue = 0.0
 
-    # -----------------------------------------------------------------------------
-    # Initialization calls to start MQTT
-    # -----------------------------------------------------------------------------
+
     def b_init_mqtt(self):
+        """ Initializes the mqtt object with the appropriate parameters
+        Args:
+            None
+
+        Returns:
+            The define value of the kind of message that has received
+        """
 
         self.mqtt.init_mqtt(self.strBrokerAddress, self.sPort, self.strUser, self.strPassword)
         while not self.mqtt.Connected:  # Wait for connection
@@ -54,60 +59,34 @@ class Coordinator:
         print(self.mqtt.subscribe("esp/responses"))
         return 1  # TODO - Timeouts to return true o false
 
-    # -----------------------------------------------------------------------------
-    # Function to catch user entry and validates it
-    # -----------------------------------------------------------------------------
-    def s_user_petition(self):
-        self.sUserPetition = 0
-        while not self.sUserPetition:
-            try:
-                self.sUserPetition = int(input("1) Get Status \n"
-                                               "2) Open the cap \n"
-                                               "3) Close the cap \n"
-                                               "4) Exit\n"))
-                if not 1 <= self.sUserPetition <= 4:
-                    raise ValueError
-            except ValueError:
-                self.sUserPetition = 0
-                print("Invalid option")
 
-        return self.sUserPetition
-
-    # -----------------------------------------------------------------------------
-    # Function that checks the authenticity reads message and clasifies it
-    # -----------------------------------------------------------------------------
     def message_reader(self, raw_message):
-        # 1 - Check authentication
-        self.strMessage = ""
-        if hmacSha256.check_authentication(raw_message, "secretKey"):
-            self.strMessage = hmacSha256.get_msg(raw_message)
+        """ Reads the message given and classifies it
+        Args:
+            raw_message: The message to be classifies
 
-            # 2 - Identify the message
-            if self.strMessage == "PING":
-                self.sTypeMsg = definesValues.MSG_TYPE_PING
+        Returns:
+            The define value of the kind of message that has received
+        """
 
-            elif self.strMessage[2:8] == "STATUS": # JSON message at the beginning has {" so the info starts at 2nd char
-                self.sTypeMsg = definesValues.MSG_TYPE_STATUS
-                print("He recibido un mensaje de STATUS")
-                
-            elif self.strMessage == "CLOSED":
-                self.sTypeMsg = definesValues.MSG_TYPES_CLOSED
-                print("He recibido un mensaje de CLOSED")
-                # TODO - CLOSED MSG
+        if raw_message == "PING":
+            return definesValues.MSG_TYPE_PING
 
-            elif self.strMessage == "OPEN":
-                self.sTypeMsg = definesValues.MSG_TYPES_OPEN
-                print("He recibido un mensaje de OPEN")
-                # TODO - OPEN MSG
+        elif raw_message[2:8] == "STATUS": # JSON message at the beginning has {" so the info starts at 2nd char
+            return definesValues.MSG_TYPE_STATUS
 
-            else:
-                self.sTypeMsg = 0 # TODO - QUE PASA SI RECIBE MSG DESCONOCIDO
-                print("Mensaje desconocido")
-            return True
+        elif raw_message == "CLOSED":
+            return definesValues.MSG_TYPES_CLOSED
+            # TODO - CLOSED MSG
+
+        elif raw_message == "OPEN":
+            return definesValues.MSG_TYPES_OPEN
+            # TODO - OPEN MSG
+
         else:
-            # Message no authentic
-            print("Mensaje no autentico")
-            return False
+            return 0 # TODO - QUE PASA SI RECIBE MSG DESCONOCIDO
+
+
 
     # -----------------------------------------------------------------------------
     # Function that decode Status Message
@@ -159,27 +138,7 @@ class Coordinator:
         else:
             return "Cant read JSON msg"
 
-    # -----------------------------------------------------------------------------
-    # Function that manages user petition
-    # Return value:
-    #   1  - Everything Ok
-    #   0  - Different message type than expected
-    #   -1 - No authentic
-    #   -2 - Timeout
-    # -----------------------------------------------------------------------------
-    def expected_message(self, msg_type):
-        if self.mqtt.wait_message():
-            # Check authenticity
-            if self.message_reader(self.mqtt.get_raw_message()):
-                # Check if the message is the expected
-                if self.sTypeMsg == msg_type:
-                    return 1
-                else:
-                    return definesValues.ERROR_NOT_MESSAGE_EXPECTED
-            else:
-                return definesValues.ERROR_NOT_MESSAGE_AUTHENTIC
-        else:
-            return definesValues.ERROR_TIMEOUT
+
 
     # -----------------------------------------------------------------------------
     # Function that manages user petition
@@ -190,12 +149,28 @@ class Coordinator:
             # Case 1 - Get Status
             if self.sUserPetition == 1:
                 self.mqtt.send_message('PING')
-                if self.expected_message(definesValues.MSG_TYPE_PING) == 1:
+                expectedMsgPing = self.expected_message(definesValues.MSG_TYPE_PING)
+
+                if expectedMsgPing == 1:
                     self.mqtt.send_message('GETSTATUS')
-                    if self.expected_message(definesValues.MSG_TYPE_STATUS) == 1:
+                    expectedMsgStatus = self.expected_message(definesValues.MSG_TYPE_STATUS)
+                    if  expectedMsgStatus == 1:
                         print(self.compose_status())
-                    else:
+                    elif expectedMsgStatus == definesValues.ERROR_NOT_MESSAGE_EXPECTED:
                         print("Mensaje no esperado - No STATUS")
-                else:
+
+                    elif expectedMsgPing == definesValues.ERROR_NOT_MESSAGE_AUTHENTIC:
+                        print ("Mensaje no autentico")
+
+                    elif expectedMsgPing == definesValues.ERROR_TIMEOUT:
+                        print("Timeout")
+
+                elif expectedMsgPing == definesValues.ERROR_NOT_MESSAGE_EXPECTED:
                     print ("Mensjae no esperado - No PING")
+
+                elif expectedMsgPing == definesValues.ERROR_NOT_MESSAGE_AUTHENTIC:
+                    print ("Mensaje no autentico")
+
+                elif expectedMsgPing == definesValues.ERROR_TIMEOUT:
+                    print("Timeout")
 

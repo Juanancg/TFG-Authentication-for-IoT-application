@@ -170,6 +170,12 @@ class Coordinator {
 				Serial.println("Tipo de mensaje recibido de Get Status");
 				return 2;
 
+			}else if(strcmp(message,"OPEN")==0){
+				Serial.println("Tipo de mensaje recibido de OPEN");
+				return 3;
+			}else if(strcmp(message,"CLOSE")==0){
+				Serial.println("Tipo de mensaje recibido de CLOSE");
+				return 4;
 			} else{
 				return 0;
 			}

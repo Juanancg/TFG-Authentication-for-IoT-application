@@ -49,8 +49,9 @@ def check_authentication(message, key):
         hash_original = message[0:64]
         msg_original = message[64:msg_len]
         hash_to_compare = make_HMAC(msg_original, key)
-
+        print(hash_to_compare)
+        print(hash_original)
         if hash_to_compare == hash_original:
-            return 1
+            return True
         else:
-            return 0
+            return False
