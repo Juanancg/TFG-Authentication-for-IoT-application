@@ -62,6 +62,7 @@ class Coordinator {
 	      	sdaPin = 26;
 			sclPin = 25;
 			accelerometer.mpu_init(sdaPin, sclPin);
+			// accelerometer.mpu_calibrate();
 			accelerometer.setOffSet(-2.75, -1.07, -0.51);
 			/* Initialites HMAC Key */
 			key = "secretKey"; 
@@ -106,6 +107,8 @@ class Coordinator {
 			JsonObject& JSONAngles = JSONbuffer.createObject();
 
 			/*<< Angle Information */
+			accelerometer.setOffSet(-2.75, -1.07, -0.51);
+			accelerometer.calcRotation();
 			JSONAngles["X_AXIS"] = accelerometer.get_value('x');
 			JSONAngles["Y_AXIS"] = accelerometer.get_value('y');
 			JSONAngles["Z_AXIS"] = accelerometer.get_value('z');

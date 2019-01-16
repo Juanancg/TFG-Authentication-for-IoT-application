@@ -91,7 +91,7 @@ class MQTTHelper:
     # Function to disconnect from the mqtt client
     # -----------------------------------------------------------------------------
     def disconnect(self):
-        self.client.publish("python/test", 'Disconnected')
+        # self.client.publish("python/test", 'Disconnected')
         self.Connected = False
         self.client.disconnect()
         self.client.loop_stop()

@@ -120,25 +120,24 @@ class Coordinator:
     # Function that analyzes the values of status msg and compose external msg
     # -----------------------------------------------------------------------------
     def compose_status(self):
-        #strMessageStatusToShow1 = ""
-        # Check if it can read JSON message
-        if self.decode_Status_msg(self.strMessage) == 1:
-            strMessageStatusToShow1 = "STATUS: \n"
-            strMessageStatusToShow1 = strMessageStatusToShow1 + "Photodiode Value: " + str(self.photodiodeValue)
-            if self.analyze_Photodiode_Value(self.photodiodeValue):
-                strMessageStatusToShow1 = strMessageStatusToShow1 + " - Invalid to open the cap"
-            else:
-                strMessageStatusToShow1 = strMessageStatusToShow1 + " - Valid to open the cap"
-            strMessageStatusToShow1 = strMessageStatusToShow1 + "\nOpen: " + str(self.fdcOpenValue) + \
-                                          "\nClosed: " + str(self.fdcClosedValue) + "\nX Axis: " + \
-                                          str(self.axisXValue) + "\nY Axis: " + str(self.axisYValue) + \
-                                          "\nZ Axis: " + str(self.axisZValue)
-
-            return strMessageStatusToShow1
+        strMessageStatusToShow1 = "STATUS: \n"
+        strMessageStatusToShow1 = strMessageStatusToShow1 + "Photodiode Value: " + str(self.photodiodeValue)
+        if self.analyze_Photodiode_Value(self.photodiodeValue):
+            strMessageStatusToShow1 = strMessageStatusToShow1 + " - Invalid to open the cap"
         else:
-            return "Cant read JSON msg"
+            strMessageStatusToShow1 = strMessageStatusToShow1 + " - Valid to open the cap"
+        strMessageStatusToShow1 = strMessageStatusToShow1 + "\nOpen: " + str(self.fdcOpenValue) + \
+                                      "\nClosed: " + str(self.fdcClosedValue) + "\nX Axis: " + \
+                                      str(self.axisXValue) + "\nY Axis: " + str(self.axisYValue) + \
+                                      "\nZ Axis: " + str(self.axisZValue)
+
+        return strMessageStatusToShow1
 
 
+    def get_actual_time(self):
+        strings = time.strftime("%Y,%m,%d,%H,%M,%S")
+        t = strings.split(',')
+        return t[3]+":"+t[4]+":"+t[5]+" "+t[2]+"/"+t[1]+"/"+t[0]
 
     # -----------------------------------------------------------------------------
     # Function that manages user petition
@@ -152,6 +151,7 @@ class Coordinator:
                 expectedMsgPing = self.expected_message(definesValues.MSG_TYPE_PING)
 
                 if expectedMsgPing == 1:
+                    ###################################################
                     self.mqtt.send_message('GETSTATUS')
                     expectedMsgStatus = self.expected_message(definesValues.MSG_TYPE_STATUS)
                     if  expectedMsgStatus == 1:

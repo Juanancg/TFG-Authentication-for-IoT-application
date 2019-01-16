@@ -179,15 +179,15 @@ class MPU_6050: public Sensor{
 		float get_value(char eje){
 			
 			if(eje=='x'){
-				calcRotation();
+				// calcRotation();
 				return angleX;
 			}
 			if(eje=='y'){
-				calcRotation();
+				// calcRotation();
 				return angleY;
 			}
 			if(eje=='z'){
-				calcRotation();
+				// calcRotation();
 				return angleZ;
 			}
 		}			
