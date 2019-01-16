@@ -117,6 +117,25 @@ class Coordinator:
             return True
 
     # -----------------------------------------------------------------------------
+    # Function that analyzes angles values, Z value isnt necessary because of
+    # rotation in Z isnt relevant for the cap
+    # -----------------------------------------------------------------------------
+    def analyze_Angles_values(self):
+        boolean = True
+        if self.axisXValue < definesValues.ANGLE_X_MAX_VALUE:
+            boolean = boolean * True
+        else:
+            print("X axis invalid")
+            boolean = boolean * False
+        if self.axisYValue < definesValues.ANGLE_Y_MAX_VALUE:
+            boolean = boolean * True
+        else:
+            print("Y axis invalid")
+            boolean = boolean * False
+        return boolean
+
+
+    # -----------------------------------------------------------------------------
     # Function that analyzes the values of status msg and compose external msg
     # -----------------------------------------------------------------------------
     def compose_status(self):
@@ -134,43 +153,46 @@ class Coordinator:
         return strMessageStatusToShow1
 
 
+    def checkStatus(self, statusmsg, open):
+        if self.decode_Status_msg(statusmsg) == 1:
+            # First checks the Limit Switches
+            if(self.fdcOpenValue != open or self.fdcClosedValue == open):
+                # To open the cap its needed to check more conditions
+
+                if open == 1:
+                    # Second checks the Photodiode value
+
+                    if self.analyze_Photodiode_Value(self.photodiodeValue):
+                        # Last checks the angles
+
+                        if self.analyze_Angles_values():
+                            return True
+                        else:
+                            return False
+
+                    else:
+                        print("Photodiode value doesnt allow to open the cap")
+                        return False
+
+                else:
+                    return True
+
+            else:
+                if open == 1:
+                    print("The Limit Switches said that the cap is open")
+                else:
+                    print("The Limit Switches said that the cap is close")
+
+                return False
+        else:
+            return definesValues.ERROR_READ_JSON
+
+
+
     def get_actual_time(self):
         strings = time.strftime("%Y,%m,%d,%H,%M,%S")
         t = strings.split(',')
         return t[3]+":"+t[4]+":"+t[5]+" "+t[2]+"/"+t[1]+"/"+t[0]
 
-    # -----------------------------------------------------------------------------
-    # Function that manages user petition
-    # -----------------------------------------------------------------------------
-    def petition_manager(self):
-        self.s_user_petition()
-        if self.sUserPetition != 4:
-            # Case 1 - Get Status
-            if self.sUserPetition == 1:
-                self.mqtt.send_message('PING')
-                expectedMsgPing = self.expected_message(definesValues.MSG_TYPE_PING)
 
-                if expectedMsgPing == 1:
-                    ###################################################
-                    self.mqtt.send_message('GETSTATUS')
-                    expectedMsgStatus = self.expected_message(definesValues.MSG_TYPE_STATUS)
-                    if  expectedMsgStatus == 1:
-                        print(self.compose_status())
-                    elif expectedMsgStatus == definesValues.ERROR_NOT_MESSAGE_EXPECTED:
-                        print("Mensaje no esperado - No STATUS")
-
-                    elif expectedMsgPing == definesValues.ERROR_NOT_MESSAGE_AUTHENTIC:
-                        print ("Mensaje no autentico")
-
-                    elif expectedMsgPing == definesValues.ERROR_TIMEOUT:
-                        print("Timeout")
-
-                elif expectedMsgPing == definesValues.ERROR_NOT_MESSAGE_EXPECTED:
-                    print ("Mensjae no esperado - No PING")
-
-                elif expectedMsgPing == definesValues.ERROR_NOT_MESSAGE_AUTHENTIC:
-                    print ("Mensaje no autentico")
-
-                elif expectedMsgPing == definesValues.ERROR_TIMEOUT:
-                    print("Timeout")
 
