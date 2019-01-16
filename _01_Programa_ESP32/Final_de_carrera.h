@@ -13,13 +13,12 @@ class Final_de_carrera: public Sensor{
 		}
 
 		/*********************************************CONSTRUCTOR***************************************//**
-		*	\brief
     	***************************************************************************************************/ 
 		Final_de_carrera(int pin1){
 			pin=pin1;
 			pinMode(pin, INPUT);
 		}
-
+		
 		/*********************************************FUNCTION******************************************//**
     	*	\brief Function that sets the pin of the Limit Switch and configures the specified pin to 
     	*			behave as an Input pullup

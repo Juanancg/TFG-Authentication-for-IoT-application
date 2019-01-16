@@ -4,7 +4,9 @@
 # IMPORTS
 # -----------------------------------------------------------------------------
 import hashlib
+from Crypto.Cipher import AES
 import hmac
+import binascii
 
 
 # Make the HMAC code with the message to send and the secret key
@@ -55,3 +57,10 @@ def check_authentication(message, key):
             return True
         else:
             return False
+
+def cipherAES(message, key):
+    #msg = AES.new(key, AES.MODE_ECB, message)
+    #return str(binascii.hexlify(msg),'ascii')
+    cipher = AES.new(key, AES.MODE_ECB)
+    msg = cipher.encrypt(message)
+    return str(binascii.hexlify(msg),'ascii')

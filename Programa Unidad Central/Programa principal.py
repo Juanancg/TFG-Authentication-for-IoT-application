@@ -12,8 +12,6 @@ while True:
     time.sleep(0.5)
 
 
-
-
 """
 data = "{\"STATUS\":{\"PHOTODIODE\":4095,\"FDC\":{\"FDC_O\":1,\"FDC_C\":0},\"ANGLE\":{\"X_AXIS\":-0.54,\"Y_AXIS\":-0.13,\"Z_AXIS\":0.77}}}"
 

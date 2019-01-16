@@ -14,26 +14,28 @@
 class Coordinator {
 
 	private:
-		HmacSha256 crypto;
+		
 		char JSONmessageBuffer[250];
-	    /* WiFi */
-	    const char* ssid = "TP-LINK_F3200A";
-	    const char* password =  "43491896";
-	    /* MQTT - Utilizando CloudMQTT */
-	    const char* mqttServer = "m20.cloudmqtt.com";
-	    const int   mqttPort = 12834;
-	    const char* mqttUser = "rmqewpne";
-	    const char* mqttPassword = "kFlJMJ_jC5pk";
-    
-	public:
+		/* WiFi */
 
-		char *mensaje;
-		char *mensaje_get;
-		char *strRawMessage;
-		char *key;
+		const char* ssid = "************";
+
+		const char* password =  "***********";
+
+
+		/* MQTT - Utilizando CloudMQTT */
+
+		const char* mqttServer = "*******";
+
+		const int mqttPort = *******;
+
+		const char* mqttUser = "*********";
+
+		const char* mqttPassword = "*********";
+    	char *key;
 
 		WiFi_MQTT client;
-
+		HmacSha256 crypto;
 		/* System Components */
 		Servomotor servo; 
 		MPU_6050 accelerometer;
@@ -41,16 +43,9 @@ class Coordinator {
 
 		int sdaPin = 26;
 		int sclPin = 25;
-		float angulox, anguloy, anguloz;
-		int fotodiodo_Value;
 
-    	/*********************************************CONSTRUCTOR***************************************//**
-    	*	\brief Constructor of Coordinator Class
-    	*	\return
-    	***************************************************************************************************/
-    	/*Coordinator():servo(13), fotodiodo(36){
-
-    	}*/
+	public:
+	
 
     	/*********************************************FUNCTION******************************************//**
     	*	\brief Function that initializes the coordinator class and objects 
@@ -67,7 +62,7 @@ class Coordinator {
 	      	sdaPin = 26;
 			sclPin = 25;
 			accelerometer.mpu_init(sdaPin, sclPin);
-
+			accelerometer.setOffSet(-2.75, -1.07, -0.51);
 			/* Initialites HMAC Key */
 			key = "secretKey"; 
 			Serial.println("Cooridnator initialized!");
@@ -86,13 +81,8 @@ class Coordinator {
 				char* strHMACReal;
 				/* EXTRAEMOS LA FIRMA DIGITAL */
 				strHMACReceived = crypto.get_digital_sig(mensaje_to_check);
-	      		Serial.print("HMAC RECIBIDO: ");
-	      		Serial.println(strHMACReceived);
 				/* GENERAMOS LA FIRMA DIGITAL QUE DEBERÍA SER */
 				strHMACReal = crypto.strComputeHMAC(key, crypto.strGetMessageFromRaw(mensaje_to_check));
-	      		Serial.print("HMAC supuesto: ");
-	      		Serial.println(strHMACReal);
-
 				/* COMPARAMOS AMBAS FIRMAS */
 				return crypto.comparacion(strHMACReceived, strHMACReal);
 

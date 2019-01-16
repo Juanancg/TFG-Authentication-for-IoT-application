@@ -15,16 +15,20 @@ class MPU_6050: public Sensor{
 	
 		float MPIDEG = 360 / 2.0 / PI;
 		double offsetX = 0, offsetY = 0, offsetZ = 0;
-		double gyro_angle_x = 0, gyro_angle_y = 0, gyro_angle_z = 0;
-		float angleX, angleY, angleZ;
-		float lastAngleX, lastAngleY, lastAngleZ;
-		float interval, preInterval;
-		float acc_x, acc_y, acc_z, acc_angle_x, acc_angle_y;
-		float gx, gy, gz, dpsX, dpsY, dpsZ;
+
+		float angleX, angleY, angleZ;		
+		
+		float dpsX, dpsY, dpsZ;
 	
 	public:
+
+		void setOffSet(float x, float y, float z){
+			offsetX = x;
+			offsetY = y;
+			offsetZ = z;
+		}
+
 		// I2c Write
-		
 		void writeMPU6050(byte reg, byte data) {
 		  Wire.beginTransmission(MPU6050_ADDR);
 		  Wire.write(reg);
@@ -116,7 +120,9 @@ class MPU_6050: public Sensor{
 		void calcRotation(){
 		  // Calculate angle from accel/gyro
 		  int16_t raw_acc_x, raw_acc_y, raw_acc_z, raw_t, raw_gyro_x, raw_gyro_y, raw_gyro_z ;
-		  
+		  float acc_x, acc_y, acc_z, acc_angle_x, acc_angle_y;
+		  float interval, preInterval;
+  			double gyro_angle_x = 0, gyro_angle_y = 0, gyro_angle_z = 0;
 		  // Instructs the MPU 6050 to output a total of 14 bytes of data from the register address 0 × 3 B
 		  Wire.beginTransmission(MPU6050_ADDR);
 		  Wire.write(0x3B);
@@ -185,17 +191,6 @@ class MPU_6050: public Sensor{
 				return angleZ;
 			}
 		}			
-		// float GetAngleX ( ){	
-			// calcRotation();
-			// return angleX;
-		// }
-		// float GetAngleY ( ){
-			// calcRotation();
-			// return angleY;
-		// }		
-		// float GetAngleZ ( ){	
-			// calcRotation();
-			// return angleZ;
-		// }			
+		
 			
 };

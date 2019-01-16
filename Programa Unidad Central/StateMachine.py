@@ -11,7 +11,7 @@ class StateMachine:
         self.coordinator = CoordinatorClass.Coordinator()
         self.sUserPetition = 0
         self.state = 0
-        self.oldState = 0
+        self.lastState = 0
         self.timeoutNumber = 0
         self.coordinator.b_init_mqtt()
 
@@ -33,23 +33,16 @@ class StateMachine:
                 userPetition = 0
                 print("Invalid option")
         if userPetition == 0:
-            self.oldState = 0
+            self.lastState = 0
             self.state = 0
         if userPetition == 1:
-            self.oldState = 0
+            self.lastState = 0
             self.state = 1
 
 
 
     def pingMessage_S1(self, userPetition):
-        print("he llegado al ping")
-        self.coordinator.mqtt.send_message('PING')
-        self.oldState = 1
-        self.state = 2
-
-
-    def waitForMessage_S2(self, userPetition):
-        """ Second state: Wait for a incoming message
+        """ First state: Send the PING msg
 
         When
 
@@ -59,31 +52,50 @@ class StateMachine:
         Returns:
             The define value of the kind of message that has received
         """
+        print("he llegado al ping")
+        self.coordinator.mqtt.send_message('PING')
+        self.lastState = 1
+        self.state = 2
+
+
+    def waitForMessage_S2(self, userPetition):
+        """ Second state: Wait for a incoming message
+
+        When the message arrives, it checks the authenticity of the message. Then, if its correct, it reads
+        the message without the HMAC and if it is the message expected, it goes to the next state. If not,
+        it goes to the zero state
+
+        Args:
+            userPetition: Petition introduced by the Python user
+        """
+
         msg_type = 0
-        if self.oldState == 1:
-            print("El mensaje anterior es PING")
+        if self.lastState == 1:
             msg_type = definesValues.MSG_TYPE_PING
+        # Aqui poner cuando venga del estado de STATUS, CLOSE, OPEN
+
 
         if msg_type == 0:
-            self.oldState = 2
+            self.lastState = 2
             self.state = 0
 
         elif self.coordinator.mqtt.wait_message():
-            # Check authenticity
-            print("Paso por aqui")
+
             strMessage = self.coordinator.mqtt.get_raw_message()
-            print(strMessage)
+
+            # Check if the authenticity
             if hmacSha256.check_authentication(strMessage, "secretKey"):
 
                 # Check if the message is the expected
                 if self.coordinator.message_reader(hmacSha256.get_msg(strMessage)) == msg_type:
 
-                    if self.oldState == 1:
+                    # Then, depending of the last state, activate the next state
+                    if self.lastState == 1:
                         self.state = 0
                         print("He llegado hasta el final")
 
-                    elif self.oldState == 3:
-                        self.state = 0
+                    elif self.lastState == 3:
+                        self.state = 4
                     else:
                         self.state = 0
                 else:
@@ -95,7 +107,7 @@ class StateMachine:
         else:
             print("Error - Timeout")
             self.state = 0
-        self.oldState = 2
+        self.lastState = 2
 
     # -----------------------------------------------------------------------------
     # Function that manages the state machine

@@ -35,7 +35,7 @@ class WiFi_MQTT {
 
 			Serial.println("Connecting to MQTT...");
 
-			if (MQTTClient.connect("ESP32Client", mqtt_Usr, mqtt_Pswd )) {
+			if (MQTTClient.connect("ESP32Client", mqtt_Usr, mqtt_Pswd,"/esp/LastWill",0,0,"Bye from ESP32")) {
 
 				Serial.println("connected"); 
 				//client.publish("esp/test1", "ESP32 conectado !"); 

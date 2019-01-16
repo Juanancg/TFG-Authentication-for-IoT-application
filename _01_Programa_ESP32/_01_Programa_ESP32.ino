@@ -20,7 +20,7 @@ void setup() {
 }
 
 void loop() {
-  // coordinator.cliente.MQTTClient.loop(); 
+  //coordinator.cliente.MQTTClient.loop(); 
   //Serial.println(coordinator.get_values_to_json());
   //Serial.println();
   coordinator.waitingMessage();
