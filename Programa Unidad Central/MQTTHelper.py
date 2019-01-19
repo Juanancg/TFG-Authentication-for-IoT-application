@@ -35,6 +35,16 @@ class MQTTHelper:
         print("Mensaje recibido :", str(message.payload.decode("utf-8")))
         self.strMessageReceived = str(message.payload.decode("utf-8"))
 
+    def on_message_LW(self, client, userdata, message):
+
+        self.strMessageReceived = ""
+        print("Mensaje recibido :", str(message.payload.decode("utf-8")))
+        strLastWillMsg = str(message.payload.decode("utf-8"))
+        if(strLastWillMsg == 'Bye from ESP32'):
+            var = True
+        elif(strLastWillMsg == 'Connected'):
+            var = False
+
     # -----------------------------------------------------------------------------
     # Function that initializes the mqtt connection
     # -----------------------------------------------------------------------------

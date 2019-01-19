@@ -16,38 +16,29 @@ class Coordinator {
 	private:
 		
 		char JSONmessageBuffer[250];
-		/* WiFi */
-
-		const char* ssid = "************";
-
-		const char* password =  "***********";
-
-
-		/* MQTT - Utilizando CloudMQTT */
-
-		const char* mqttServer = "*******";
-
-		const int mqttPort = *******;
-
-		const char* mqttUser = "*********";
-
-		const char* mqttPassword = "*********";
+	    /* WiFi */
+	    const char* ssid = "TP-LINK_F3200A";
+	    const char* password =  "43491896";
+	    /* MQTT */
+	    const char* mqttServer = "m20.cloudmqtt.com";
+	    const int   mqttPort = 12834;
+	    const char* mqttUser = "rmqewpne";
+	    const char* mqttPassword = "kFlJMJ_jC5pk";
     	char *key;
+
 		WiFi_MQTT client;
 		HmacSha256 crypto;
+		
 		/* System Components */
-		// Servomotor servo; 
-
-		Servomotor servo; 
-
-		MPU_6050 accelerometer;
+		
 		Fotodiodo fotodiodo;
+		Servomotor servo; 
 
 		int sdaPin = 26;
 		int sclPin = 25;
 
 	public:
-
+		MPU_6050 mpu_sensor;
     	/*********************************************FUNCTION******************************************//**
     	*	\brief Function that initializes the coordinator class and objects 
     	*	\return
@@ -59,12 +50,9 @@ class Coordinator {
 	      	/* Initialites System components*/
 	      	servo.set_pin(18);
 	      	servo.setup();
+	      	mpu_sensor.mpuSetup();
 	      	fotodiodo.set_pin(36);
-	      	sdaPin = 26;
-			sclPin = 25;
-			accelerometer.mpu_init(sdaPin, sclPin);
-			accelerometer.mpu_calibrate();
-			accelerometer.setOffSet(-2.75, -1.07, -0.51);
+
 			/* Initialites HMAC Key */
 			key = "secretKey"; 
 			Serial.println("Cooridnator initialized!");
@@ -107,17 +95,20 @@ class Coordinator {
 			JsonObject& JSONAngle = JSONbuffer.createObject();
 			JsonObject& JSONAngles = JSONbuffer.createObject();
 
+			float *yawPitchRoll = mpu_sensor.getyaw(mpu_sensor.fifoBuffer);
+
 			/*<< Angle Information */
-			accelerometer.setOffSet(-2.75, -1.07, -0.51);
-			accelerometer.calcRotation();
-			JSONAngles["X_AXIS"] = accelerometer.get_value('x');
-			JSONAngles["Y_AXIS"] = accelerometer.get_value('y');
-			JSONAngles["Z_AXIS"] = accelerometer.get_value('z');
+			JSONAngles["X_AXIS"] = yawPitchRoll[2]; // Roll
+			JSONAngles["Y_AXIS"] = yawPitchRoll[1]; // Pitch
+			JSONAngles["Z_AXIS"] = yawPitchRoll[0]; // Yaw
+
 			/*<< Limit Switch Information */
 			JSONLimitSwitch["LimitSwitch_C"] = servo.sensor_cierre.get_value();
 			JSONLimitSwitch["LimitSwitch_O"] = servo.sensor_apertura.get_value();
+
 			/*<< Photodiode Information */
 			JSONStatusContent["PHOTODIODE"] = fotodiodo.get_value();
+
 			/*<< Join all the information */
 			JSONStatusContent["LimitSwitch"] = JSONLimitSwitch;
 			JSONStatusContent["ANGLES"] = JSONAngles;
@@ -144,28 +135,14 @@ class Coordinator {
 					  	// GET STATUS CASE
 						    sendStatusMessage();
 						    break;
-					    case 3:
-					    	/*apertura = servo.sensor_apertura.get_value();
-							if(apertura == 0){
-								 
-								for (int i = valor; i > 40; i -= 1){
-									if(servo.sensor_apertura.get_value() == 1){
-										Serial.println("Sensor apertura activado");
-										break;
-									}
-									Serial.println(i);
-									servo.myservo.write(i);
-									delay(100);
-								}
-							}*/
-					    	
+					    case 3:			    	
 					    	if (servo.open()){
 			    				sendOpennedMessage();
 			    			} else{
 
 			    			}
 			    			break;
-					    	//}
+
 				    	case 4:
 				    		if(servo.close()){
 				    			sendClosedMessage();

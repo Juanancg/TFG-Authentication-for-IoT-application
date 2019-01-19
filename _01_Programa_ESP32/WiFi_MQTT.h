@@ -48,6 +48,7 @@ class WiFi_MQTT {
 			}
 		}
 		MQTTClient.subscribe("esp/order");
+		MQTTClient.publish("/esp/LastWill",  "Connected");
 		MQTTClient.setCallback([this] (char* topic, byte* payload, unsigned int length) { this->callback(topic, payload, length); });
 
     }

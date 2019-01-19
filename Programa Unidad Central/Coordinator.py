@@ -57,6 +57,7 @@ class Coordinator:
             print("Waiting for connection")
             time.sleep(0.1)
         print(self.mqtt.subscribe("esp/responses"))
+        print(self.mqtt.subscribe("/esp/LastWill"))
         return 1  # TODO - Timeouts to return true o false
 
 
