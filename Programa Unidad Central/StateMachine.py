@@ -23,7 +23,7 @@ class StateMachine:
     # Estado 0
     # -----------------------------------------------------------------------------
     def user_petition_S0(self, userPetition):
-        print("Estado 1")
+        print("Estado 0")
         userPetition = 0
         while not userPetition:
             try:
@@ -74,13 +74,19 @@ class StateMachine:
         """
         print("Estado 2")
         msg_type = 0
+        # Define expected msg in function of the last State
         if self.lastState == 1:
             msg_type = definesValues.MSG_TYPE_PING
         elif self.lastState == 3:
             msg_type = definesValues.MSG_TYPE_STATUS
+        elif self.lastState == 7:
+            msg_type = definesValues.MSG_TYPES_OPEN
+        elif self.lastState == 10:
+            msg_type = definesValues.MSG_TYPES_CLOSED
 
-
+        # If no msg expected has been defined, then go to initial state
         if msg_type == 0:
+            print("No ha habido mensaje esperado definido")
             self.lastState = 2
             self.state = 0
 
@@ -195,7 +201,7 @@ class StateMachine:
         print("Estado 6")
         value = self.coordinator.checkStatus(self.lastStatusMessage, 1)
         if value != -3:
-            if value == 1:
+            if value:
                 self.state = 7
             else:
                 print("The conditions make impossible to open the cap")

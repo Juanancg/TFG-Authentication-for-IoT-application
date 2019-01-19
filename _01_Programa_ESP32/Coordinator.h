@@ -33,11 +33,13 @@ class Coordinator {
 
 		const char* mqttPassword = "*********";
     	char *key;
-
 		WiFi_MQTT client;
 		HmacSha256 crypto;
 		/* System Components */
+		// Servomotor servo; 
+
 		Servomotor servo; 
+
 		MPU_6050 accelerometer;
 		Fotodiodo fotodiodo;
 
@@ -45,7 +47,6 @@ class Coordinator {
 		int sclPin = 25;
 
 	public:
-	
 
     	/*********************************************FUNCTION******************************************//**
     	*	\brief Function that initializes the coordinator class and objects 
@@ -56,13 +57,13 @@ class Coordinator {
 	      	client.init(ssid, password, mqttServer, mqttPort, mqttUser, mqttPassword);
 
 	      	/* Initialites System components*/
-	      	servo.set_pin(13);
+	      	servo.set_pin(18);
 	      	servo.setup();
 	      	fotodiodo.set_pin(36);
 	      	sdaPin = 26;
 			sclPin = 25;
 			accelerometer.mpu_init(sdaPin, sclPin);
-			// accelerometer.mpu_calibrate();
+			accelerometer.mpu_calibrate();
 			accelerometer.setOffSet(-2.75, -1.07, -0.51);
 			/* Initialites HMAC Key */
 			key = "secretKey"; 
@@ -129,6 +130,8 @@ class Coordinator {
 		void waitingMessage(){
 			client.MQTTClient.loop();
 			// When it receives a message 
+			int apertura;
+			int valor = 100;
 			if(client.flag_msg_recibido){
 				client.flag_msg_recibido = 0;
 				if (bCheckAuth(client.mensaje_inicial)){
@@ -141,8 +144,35 @@ class Coordinator {
 					  	// GET STATUS CASE
 						    sendStatusMessage();
 						    break;
+					    case 3:
+					    	/*apertura = servo.sensor_apertura.get_value();
+							if(apertura == 0){
+								 
+								for (int i = valor; i > 40; i -= 1){
+									if(servo.sensor_apertura.get_value() == 1){
+										Serial.println("Sensor apertura activado");
+										break;
+									}
+									Serial.println(i);
+									servo.myservo.write(i);
+									delay(100);
+								}
+							}*/
+					    	
+					    	if (servo.open()){
+			    				sendOpennedMessage();
+			    			} else{
+
+			    			}
+			    			break;
+					    	//}
+				    	case 4:
+				    		if(servo.close()){
+				    			sendClosedMessage();
+				    		}
+				    		break;
 					  	default:
-						    // statements
+						    sendUnkownMessage();
 						    break;
 					}
 
@@ -184,6 +214,21 @@ class Coordinator {
 			char * messageJSON = strGetValuesComposeJSON();
 			client.MQTTClient.publish("esp/responses", strcat(crypto.strComputeHMAC(key, messageJSON), messageJSON));
 			Serial.println("Mensaje de STATUS enviado");
+		}
+
+		void sendOpennedMessage(){
+			client.MQTTClient.publish("esp/responses", strcat(crypto.strComputeHMAC(key, "OPEN"), "OPEN"));
+			Serial.println("Mensaje de OPEN enviado");
+		}
+
+		void sendClosedMessage(){
+			client.MQTTClient.publish("esp/responses", strcat(crypto.strComputeHMAC(key, "CLOSED"), "CLOSED"));
+			Serial.println("Mensaje de OPEN enviado");
+		}
+
+		void sendUnkownMessage(){
+			client.MQTTClient.publish("esp/responses", strcat(crypto.strComputeHMAC(key, "UNKNOWN"), "UNKNOWN"));
+			Serial.println("Mensaje de UNKNOWN enviado");
 		}
 
 };

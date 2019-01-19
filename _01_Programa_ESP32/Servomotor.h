@@ -1,5 +1,5 @@
 #include "Final_de_carrera.h"
-#include <Servo.h>
+#include <ESP32Servo.h>
 
 class Servomotor: public Sensor{
 
@@ -9,10 +9,10 @@ class Servomotor: public Sensor{
 		Final_de_carrera sensor_cierre;
 		Servo myservo;
 		
-		Servomotor(int servo_pin):sensor_apertura(5),sensor_cierre(12){
+		/*Servomotor(int servo_pin):sensor_apertura(5),sensor_cierre(12){
 		
 			pin = servo_pin;			
-		}
+		}*/
 
 		Servomotor(){
 
@@ -20,20 +20,21 @@ class Servomotor: public Sensor{
 		
 		void set_pin(int x){
 			pin = x;
-			sensor_apertura.set_pin(4);
-			sensor_cierre.set_pin(5);
+			sensor_apertura.set_pin(5);
+			sensor_cierre.set_pin(4);
 		}
 
 		void setup(){
-			myservo.attach(pin); 
+  			myservo.setPeriodHertz(50);// Standard 50hz servo
+  			myservo.attach(pin, 500, 2500);
 		}
 
-		
-		void write(int value_to_move){
+		/*void write(int value_to_move){
 			value = value_to_move;
 			myservo.write(value);
+			//ledcWrite(0, value);
 			Serial.println("He movido el servo");
-		}
+		}*/
 		
 		int get_value(){
 		
@@ -41,19 +42,39 @@ class Servomotor: public Sensor{
 		}
 		
 		bool open(){
-			
+			Serial.println("Abriendo tapa...");
 			int valor_fca = sensor_apertura.get_value();
-			while(valor_fca==0){
-				valor_fca = sensor_apertura.get_value();
-				
-					myservo.write(value);              
-					delay(30);  
+			if(valor_fca == 0){
+				value = 100; 
+				/*for (int i = value; i > 40; i -= 1){
+					if(sensor_apertura.get_value() == 1){
+						Serial.println("Sensor apertura activado");
+						break;
+					}
+					Serial.println(i);
+					myservo.write(i);
+					delay(100);
+				}
+				}*/
+				while(valor_fca==0 || value == 40){
+
+					valor_fca = sensor_apertura.get_value();
+					Serial.print("LimitSwitch: ");
+					Serial.println(valor_fca);
+					Serial.println("----------------");
+					Serial.print("Value: ");
+					Serial.println(value);
+					myservo.write(value);
+
+					delay(100);  
 					value -= 1;
-			}	
+				}	
+
 			
 			return true;
+			}
 		}
-		
+			
 		bool close(){
 			
 			// int valor_fcc = sensor_cierre.get_value();
@@ -66,9 +87,9 @@ class Servomotor: public Sensor{
 			// }	
 			
 			
-			for (value; value <= 90; value += 1) { 
-
-				myservo.write(value);              
+			for (int i=0; i <= 170; i += 1) { 
+        		Serial.println(i);
+				myservo.write(i);              
 				delay(30);                       
 			}
 			return true;

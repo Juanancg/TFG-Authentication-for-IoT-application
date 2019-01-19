@@ -185,6 +185,8 @@ class Coordinator:
 
                 return False
         else:
+
+            print("Error Reading JSON")
             return definesValues.ERROR_READ_JSON
 
 

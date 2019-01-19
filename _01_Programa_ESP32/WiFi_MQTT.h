@@ -57,7 +57,7 @@ class WiFi_MQTT {
     	// Clear mensaje_incial
 		memset(mensaje_inicial, 0, strlen(mensaje_inicial));
 		for (int i = 0; i < length; i++) {    
-		mensaje_inicial[i]=payload[i];
+			mensaje_inicial[i]=payload[i];
 		}
 		Serial.print("Mensaje Recibido: ");
 		Serial.println(mensaje_inicial);
