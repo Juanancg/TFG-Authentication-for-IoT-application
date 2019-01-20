@@ -88,5 +88,27 @@ public:
 		return true;  
 	}
 
+	/*********************************************FUNCTION******************************************//**
+	*	\brief Function that compares HMAC received from MQTT with the HMAC that should be
+	*	\return true if is authentic false if not
+	***************************************************************************************************/    
+	bool bCheckAuth(char *key ,char *mensaje_to_check) {
+		// If the message lenght is less than 64, the message doesnt have the HMAC
+      	if(strlen(mensaje_to_check) > 64){
+
+			char* strHMACReceived;
+			char* strHMACReal;
+			/* EXTRAEMOS LA FIRMA DIGITAL */
+			strHMACReceived = get_digital_sig(mensaje_to_check);
+			/* GENERAMOS LA FIRMA DIGITAL QUE DEBERÍA SER */
+			strHMACReal = strComputeHMAC(key, strGetMessageFromRaw(mensaje_to_check));
+			/* COMPARAMOS AMBAS FIRMAS */
+			return comparacion(strHMACReceived, strHMACReal);
+
+		} else{
+			return false;
+		}
+	}
+
 };
 #endif

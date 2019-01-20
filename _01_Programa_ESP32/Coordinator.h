@@ -59,27 +59,7 @@ class Coordinator {
 	    }
     
     
-    	/*********************************************FUNCTION******************************************//**
-    	*	\brief Function that compares HMAC received from MQTT with the HMAC that should be
-    	*	\return true if is authentic false if not
-    	***************************************************************************************************/    
-		bool bCheckAuth(char *mensaje_to_check) {
-			// If the message lenght is less than 64, the message doesnt have the HMAC
-	      	if(strlen(mensaje_to_check) > 64){
 
-				char* strHMACReceived;
-				char* strHMACReal;
-				/* EXTRAEMOS LA FIRMA DIGITAL */
-				strHMACReceived = crypto.get_digital_sig(mensaje_to_check);
-				/* GENERAMOS LA FIRMA DIGITAL QUE DEBERÍA SER */
-				strHMACReal = crypto.strComputeHMAC(key, crypto.strGetMessageFromRaw(mensaje_to_check));
-				/* COMPARAMOS AMBAS FIRMAS */
-				return crypto.comparacion(strHMACReceived, strHMACReal);
-
-			} else{
-				return false;
-			}
-		}
 		
        	/*********************************************FUNCTION******************************************//**
     	*	\brief Function that get the values of the components of the system and composes a JSON msg
@@ -95,7 +75,7 @@ class Coordinator {
 			JsonObject& JSONAngle = JSONbuffer.createObject();
 			JsonObject& JSONAngles = JSONbuffer.createObject();
 
-			float *yawPitchRoll = mpu_sensor.getyaw(mpu_sensor.fifoBuffer);
+			float *yawPitchRoll = mpu_sensor.getyaw();
 
 			/*<< Angle Information */
 			JSONAngles["X_AXIS"] = yawPitchRoll[2]; // Roll
@@ -125,7 +105,7 @@ class Coordinator {
 			int valor = 100;
 			if(client.flag_msg_recibido){
 				client.flag_msg_recibido = 0;
-				if (bCheckAuth(client.mensaje_inicial)){
+				if (crypto.bCheckAuth(key,client.mensaje_inicial)){
 					switch(iMessageType(crypto.strGetMessageFromRaw(client.mensaje_inicial))){
 						case 1:
 						// PING CASE
@@ -179,7 +159,6 @@ class Coordinator {
 			} else{
 				return 0;
 			}
-
 		}
 
 		void sendPingMessage(){

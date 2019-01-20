@@ -35,7 +35,7 @@ class WiFi_MQTT {
 
 			Serial.println("Connecting to MQTT...");
 
-			if (MQTTClient.connect("ESP32Client", mqtt_Usr, mqtt_Pswd,"/esp/LastWill",0,0,"Bye from ESP32")) {
+			if (MQTTClient.connect("ESP32Client", mqtt_Usr, mqtt_Pswd,"/esp/LastWill",0,1,"0")) {
 
 				Serial.println("connected"); 
 				//client.publish("esp/test1", "ESP32 conectado !"); 
@@ -48,7 +48,7 @@ class WiFi_MQTT {
 			}
 		}
 		MQTTClient.subscribe("esp/order");
-		MQTTClient.publish("/esp/LastWill",  "Connected");
+		MQTTClient.publish("/esp/LastWill",  "1", true );
 		MQTTClient.setCallback([this] (char* topic, byte* payload, unsigned int length) { this->callback(topic, payload, length); });
 
     }

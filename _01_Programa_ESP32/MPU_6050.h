@@ -166,7 +166,7 @@ void mpuSetup(){
     #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
         /*Wire.begin();
         Wire.setClock(400000); // 400kHz I2C clock. Comment this line if having compilation difficulties*/
-        Wire.begin(21 , 22, 400000); // Order - SDA SCL 21 22
+        Wire.begin(21 , 22, 100000); // Order - SDA SCL 21 22
     #elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
         Fastwire::setup(400, true);
     #endif
@@ -284,26 +284,29 @@ void mpuSetup(){
 	    } else if (mpuIntStatus & _BV(MPU6050_INTERRUPT_DMP_INT_BIT)) {
 	        // wait for correct available data length, should be a VERY short wait
 	        while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
-
+          
 	        // read a packet from FIFO
 	        mpu.getFIFOBytes(fifoBuffer, packetSize);
-	        mpu.resetFIFO();
+	        // mpu.resetFIFO();
 	        // track FIFO count here in case there is > 1 packet available
 	        // (this lets us immediately read more without waiting for an interrupt)
+
 	        fifoCount -= packetSize;
-	    
+          mpu.dmpGetQuaternion(&q, fifoBuffer);
+          mpu.dmpGetGravity(&gravity, &q);
+          mpu.dmpGetYawPitchRoll(ypr, &q, &gravity); 
+          for(int i = 0; i < 3; i++){
+            ypr[i] = ypr[i] * 180/M_PI;
+          }
 	    }
 	}
 
-	float * getyaw(uint8_t *fifoBuffer1){
+	float * getyaw(){
 
 
-        mpu.dmpGetQuaternion(&q, fifoBuffer1);
-        mpu.dmpGetGravity(&gravity, &q);
-        mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);  
-        for(int i = 0; i < 3; i++){
-        	ypr[i] = ypr[i] * 180/M_PI;
-        }
+ 
+
+        //mpu.resetFIFO();
         return ypr;
 	    /*Serial.println("Primeros valores: ");
 	    Serial.print("ypr\t");
