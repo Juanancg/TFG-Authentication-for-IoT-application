@@ -3,63 +3,19 @@
 # -----------------------------------------------------------------------------
 import time
 import json
-import MQTTHelper as MQTTHelperClass
-import hmacSha256 as hmacSha256
 import Defines as definesValues
 
 
-class Coordinator:
+class CoordinatorStatus:
 
     def __init__(self):
-        # -----------------------------------------------------------------------------
-        # Read and save variables to start MQTT
-        data = ""
-        with open("test.txt") as file:
-            for lines in file:
-                data = lines.split(";")
-
-        # Info needed to MQTT Broker
-        self.mqtt = MQTTHelperClass.MQTTHelper()
-        self.strBrokerAddress = data[0]  # TODO - Que pasa si no lee bien el data (Hacer un if)
-        self.sPort = int(data[1])
-        self.strUser = data[2]
-        self.strPassword = data[3]
-
-        # Variable
-        self.sUserPetition = 0
-
-        # Variables for message management
-        self.strTempMsgHashed = ""
-        self.strMessage = ""
-        self.sTypeMsg = 0  # 0 Nothing - 1 Ping - 2 Status - 3 Closed - 4 Open
-
         # Variables for Status Message
-        self.strMessageStatusToShow = ""
         self.photodiodeValue = 0
         self.fdcOpenValue = 0
         self.fdcClosedValue = 0
         self.axisXValue = 0.0
         self.axisYValue = 0.0
         self.axisZValue = 0.0
-
-
-    def b_init_mqtt(self):
-        """ Initializes the mqtt object with the appropriate parameters
-        Args:
-            None
-
-        Returns:
-            The define value of the kind of message that has received
-        """
-
-        self.mqtt.init_mqtt(self.strBrokerAddress, self.sPort, self.strUser, self.strPassword)
-        while not self.mqtt.Connected:  # Wait for connection
-            print("Waiting for connection")
-            time.sleep(0.1)
-        print(self.mqtt.subscribe("esp/responses"))
-        print(self.mqtt.subscribe("/esp/LastWill"))
-        return 1  # TODO - Timeouts to return true o false
-
 
     def message_reader(self, raw_message):
         """ Reads the message given and classifies it

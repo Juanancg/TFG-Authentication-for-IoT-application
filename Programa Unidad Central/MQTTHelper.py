@@ -10,6 +10,20 @@ import Defines as definesValues
 class MQTTHelper:
 
     def __init__(self):
+        # -----------------------------------------------------------------------------
+        # Read and save variables to start MQTT
+        data = ""
+        with open("test.txt") as file:
+            for lines in file:
+                data = lines.split(";")
+
+        # Info needed to MQTT Broker
+        # self.mqtt = MQTTHelperClass.MQTTHelper()
+        self.strBrokerAddress = data[0]  # TODO - Que pasa si no lee bien el data (Hacer un if)
+        self.sPort = int(data[1])
+        self.strUser = data[2]
+        self.strPassword = data[3]
+
         self.Connected = False
         self.client = mqtt_client.Client("Python")
         self.strMessageReceived = ""
@@ -35,6 +49,8 @@ class MQTTHelper:
         print("Mensaje recibido :", str(message.payload.decode("utf-8")))
         self.strMessageReceived = str(message.payload.decode("utf-8"))
 
+
+
     def on_message_LW(self, client, userdata, message):
 
         self.strMessageReceived = ""
@@ -48,14 +64,20 @@ class MQTTHelper:
     # -----------------------------------------------------------------------------
     # Function that initializes the mqtt connection
     # -----------------------------------------------------------------------------
-    def init_mqtt(self, broker_address, port, user, password):
+    def init_mqtt(self):
         # create new instance
-        self.client.username_pw_set(user, password=password)  # set username and password
+        self.client.username_pw_set(self.strUser, password=self.strPassword)  # set username and password
         self.client.on_connect = self.on_connect  # attach function to callback
         self.client.on_message = self.on_message  # attach function to callback
 
-        self.client.connect(broker_address, port=port)  # connect to broker
+        self.client.connect(self.strBrokerAddress, port=self.sPort)  # connect to broker
         self.client.loop_start()
+        while not self.Connected:  # Wait for connection
+            print("Waiting for connection")
+            time.sleep(0.1)
+        self.subscribe("esp/responses")
+        self.subscribe("/esp/LastWill")
+        return 1
 
     # -----------------------------------------------------------------------------
     # Function to subscribe to a mqtt topic

@@ -1,7 +1,7 @@
 # -----------------------------------------------------------------------------
 # IMPORTS
 # -----------------------------------------------------------------------------
-import Coordinator as CoordinatorClass
+import CoordinatorStatus as CoordinatorStatusClass
 import hmacSha256 as hmacSha256
 import StateMachine as StateMachine
 import time

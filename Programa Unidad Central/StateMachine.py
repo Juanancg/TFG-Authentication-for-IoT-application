@@ -1,14 +1,15 @@
 # -----------------------------------------------------------------------------
 # IMPORTS
 # -----------------------------------------------------------------------------
-import Coordinator as CoordinatorClass
+import CoordinatorStatus as CoordinatorStatusClass
 import Defines as definesValues
 import hmacSha256 as hmacSha256
+import MQTTHelper as MQTTHelperClass
 
 class StateMachine:
 
     def __init__(self):
-        self.coordinator = CoordinatorClass.Coordinator()
+        self.coordinatorStatus = CoordinatorStatusClass.CoordinatorStatus()
         self.sUserPetition = 0
         self.state = 0
         self.lastState = 0
@@ -16,7 +17,8 @@ class StateMachine:
         self.lastStatusMessage = ""
         self.lastOpenMessage = ""
         self.lastCloseMessage = ""
-        self.coordinator.b_init_mqtt()
+        self.mqtt = MQTTHelperClass.MQTTHelper()
+        self.mqtt.init_mqtt()
 
     # -----------------------------------------------------------------------------
     # Function to catch user entry and validates it
@@ -39,7 +41,7 @@ class StateMachine:
         if userPetition == 0:
             self.state = 0
         elif userPetition == 4:
-            self.coordinator.mqtt.disconnect()
+            self.mqtt.disconnect()
             exit()
         else:
             self.state = 1
@@ -57,7 +59,7 @@ class StateMachine:
 
         """
         print("Estado 1")
-        self.coordinator.mqtt.send_message('PING')
+        self.mqtt.send_message('PING')
         self.lastState = 1
         self.state = 2
 
@@ -90,15 +92,15 @@ class StateMachine:
             self.lastState = 2
             self.state = 0
 
-        elif self.coordinator.mqtt.wait_message():
+        elif self.mqtt.wait_message():
 
-            raw_Message = self.coordinator.mqtt.get_raw_message()
+            raw_Message = self.mqtt.get_raw_message()
 
             # Check the authenticity
             if hmacSha256.check_authentication(raw_Message, "secretKey"):
 
                 # Check if the message is the expected
-                if self.coordinator.message_reader(hmacSha256.get_msg(raw_Message)) == msg_type:
+                if self.coordinatorStatus.message_reader(hmacSha256.get_msg(raw_Message)) == msg_type:
 
                     # Then, depending of the last state, activate the next state
                     # If last state was PING
@@ -109,8 +111,8 @@ class StateMachine:
                     elif self.lastState == 3:
                         self.lastStatusMessage = hmacSha256.get_msg(raw_Message)
 
-                        if self.coordinator.decode_Status_msg(self.lastStatusMessage) == 1:
-                            self.lastStatusMessageTime = self.coordinator.get_actual_time()
+                        if self.coordinatorStatus.decode_Status_msg(self.lastStatusMessage) == 1:
+                            self.lastStatusMessageTime = self.coordinatorStatus.get_actual_time()
                             self.state = 4
                         else:
                             print("Error - Cant decode JSON message")
@@ -146,7 +148,7 @@ class StateMachine:
 
         """
         print("Estado 3")
-        self.coordinator.mqtt.send_message('GETSTATUS')
+        self.mqtt.send_message('GETSTATUS')
         self.lastState = 3
         self.state = 2
 
@@ -183,7 +185,7 @@ class StateMachine:
 
         """
         print("Estado 5")
-        print(self.coordinator.compose_status())
+        print(self.coordinatorStatus.compose_status())
         print(self.lastStatusMessageTime)
         self.lastState = 5
         self.state = 0
@@ -199,7 +201,7 @@ class StateMachine:
         """
 
         print("Estado 6")
-        value = self.coordinator.checkStatus(self.lastStatusMessage, 1)
+        value = self.coordinatorStatus.checkStatus(self.lastStatusMessage, 1)
         if value != -3:
             if value:
                 self.state = 7
@@ -222,7 +224,7 @@ class StateMachine:
 
         """
         print("Estado 7")
-        self.coordinator.mqtt.send_message('OPEN')
+        self.mqtt.send_message('OPEN')
         self.lastState = 7
         self.state = 2
 
@@ -250,7 +252,7 @@ class StateMachine:
             userPetition: Petition introduced by the Python user
         """
         print("Estado 9")
-        value = self.coordinator.checkStatus(self.lastStatusMessage, 0)
+        value = self.coordinatorStatus.checkStatus(self.lastStatusMessage, 0)
         if value != -3:
             if value == 1:
                 self.state = 7
@@ -273,7 +275,7 @@ class StateMachine:
 
         """
         print("Estado 10")
-        self.coordinator.mqtt.send_message('CLOSE')
+        self.mqtt.send_message('CLOSE')
         self.lastState = 10
         self.state = 2
 
