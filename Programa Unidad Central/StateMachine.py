@@ -98,37 +98,39 @@ class StateMachine:
 
             # Check the authenticity
             if hmacSha256.check_authentication(raw_Message, "secretKey"):
+                if self.coordinatorStatus.bisOnTime(hmacSha256.get_time(raw_Message)):
+                    # Check if the message is the expected
+                    if self.coordinatorStatus.message_reader(hmacSha256.get_msg(raw_Message)) == msg_type:
 
-                # Check if the message is the expected
-                if self.coordinatorStatus.message_reader(hmacSha256.get_msg(raw_Message)) == msg_type:
+                        # Then, depending of the last state, activate the next state
+                        # If last state was PING
+                        if self.lastState == 1:
+                            self.state = 3
 
-                    # Then, depending of the last state, activate the next state
-                    # If last state was PING
-                    if self.lastState == 1:
-                        self.state = 3
+                        # If last state was GETSTATUS
+                        elif self.lastState == 3:
+                            self.lastStatusMessage = hmacSha256.get_msg(raw_Message)
 
-                    # If last state was GETSTATUS
-                    elif self.lastState == 3:
-                        self.lastStatusMessage = hmacSha256.get_msg(raw_Message)
+                            if self.coordinatorStatus.decode_Status_msg(self.lastStatusMessage) == 1:
+                                self.lastStatusMessageTime = self.coordinatorStatus.get_actual_time()
+                                self.state = 4
+                            else:
+                                print("Error - Cant decode JSON message")
+                                self.state = 0
 
-                        if self.coordinatorStatus.decode_Status_msg(self.lastStatusMessage) == 1:
-                            self.lastStatusMessageTime = self.coordinatorStatus.get_actual_time()
-                            self.state = 4
+                        # If last state was OPEN
+                        elif self.lastState == 7:
+                            self.lastOpenMessage = hmacSha256.get_msg(raw_Message)
+                            self.state = 8
+
+
                         else:
-                            print("Error - Cant decode JSON message")
                             self.state = 0
-
-                    # If last state was OPEN
-                    elif self.lastState == 7:
-                        self.lastOpenMessage = hmacSha256.get_msg(raw_Message)
-                        self.state = 8
-
-
                     else:
+                        print("Error - No msg expected")
                         self.state = 0
                 else:
-                    print("Error - No msg expected")
-                    self.state = 0
+                    print("Error - Invalid Timestamp ")
             else:
                 print("Error - No authentic")
                 self.state = 0

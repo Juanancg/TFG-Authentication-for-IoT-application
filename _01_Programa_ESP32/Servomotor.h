@@ -8,16 +8,7 @@ class Servomotor: public Sensor{
 		Final_de_carrera sensor_apertura;
 		Final_de_carrera sensor_cierre;
 		Servo myservo;
-		
-		/*Servomotor(int servo_pin):sensor_apertura(5),sensor_cierre(12){
-		
-			pin = servo_pin;			
-		}*/
-
-		Servomotor(){
-
-		}
-		
+				
 		void set_pin(int x){
 			pin = x;
 			sensor_apertura.set_pin(5);

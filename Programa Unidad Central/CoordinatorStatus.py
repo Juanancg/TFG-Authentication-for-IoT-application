@@ -2,6 +2,7 @@
 # IMPORTS
 # -----------------------------------------------------------------------------
 import time
+import datetime
 import json
 import Defines as definesValues
 
@@ -149,9 +150,20 @@ class CoordinatorStatus:
 
 
     def get_actual_time(self):
-        strings = time.strftime("%Y,%m,%d,%H,%M,%S")
-        t = strings.split(',')
-        return t[3]+":"+t[4]+":"+t[5]+" "+t[2]+"/"+t[1]+"/"+t[0]
+        return time.strftime("%H:%M:%S %d/%m/%Y")
 
+
+
+    def timeDiff(self, time1, time2):
+        timeA = datetime.datetime.strptime(time1, "%H:%M:%S")
+        timeB = datetime.datetime.strptime(time2, "%H:%M:%S")
+        newTime = timeA - timeB
+        return newTime.seconds
+
+    def bisOnTime(self, timeMsg):
+        if self.timeDiff(time.strftime("%H:%M:%S"),timeMsg) < 60:
+            return True
+        else:
+            return False
 
 

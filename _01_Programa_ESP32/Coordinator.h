@@ -26,7 +26,7 @@ class Coordinator {
 	    const char* mqttPassword = "kFlJMJ_jC5pk";
     	char *key;
 
-		WiFi_MQTT client;
+		
 		HmacSha256 crypto;
 		
 		/* System Components */
@@ -39,6 +39,7 @@ class Coordinator {
 
 	public:
 		MPU_6050 mpu_sensor;
+		WiFi_MQTT client;
     	/*********************************************FUNCTION******************************************//**
     	*	\brief Function that initializes the coordinator class and objects 
     	*	\return
@@ -75,7 +76,7 @@ class Coordinator {
 			JsonObject& JSONAngle = JSONbuffer.createObject();
 			JsonObject& JSONAngles = JSONbuffer.createObject();
 
-			float *yawPitchRoll = mpu_sensor.getyaw();
+			float *yawPitchRoll = mpu_sensor.getAngles();
 
 			/*<< Angle Information */
 			JSONAngles["X_AXIS"] = yawPitchRoll[2]; // Roll
@@ -162,13 +163,26 @@ class Coordinator {
 		}
 
 		void sendPingMessage(){
-			client.MQTTClient.publish("esp/responses", strcat(crypto.strComputeHMAC(key,"PING"),"PING"));
+			String timemsg = client.get_time();
+			String messagePing = "PING";
+			messagePing = messagePing + timemsg;
+			Serial.println(messagePing);
+			String hmacAndMsg (crypto.strComputeHMAC(key, messagePing));
+			Serial.println(hmacAndMsg);
+			hmacAndMsg = hmacAndMsg + messagePing;
+			Serial.println(hmacAndMsg);
+			client.MQTTClient.publish("esp/responses",hmacAndMsg.c_str());
 			Serial.println("Mensaje de PING enviado");
 		}
 
 		void sendStatusMessage(){
 			char * messageJSON = strGetValuesComposeJSON();
-			client.MQTTClient.publish("esp/responses", strcat(crypto.strComputeHMAC(key, messageJSON), messageJSON));
+			char * timemsg /*= client.get_time()*/;
+			timemsg = strcat(timemsg, messageJSON);
+			/*char * hmacAndMsg = crypto.strComputeHMAC(key,timemsg);
+			hmacAndMsg = strcat(hmacAndMsg, timemsg);
+			char * messageToSend = strcat(client.get_time(), hmacAndMsg);
+			client.MQTTClient.publish("esp/responses", strcat(crypto.strComputeHMAC(key, messageToSend), messageToSend));*/
 			Serial.println("Mensaje de STATUS enviado");
 		}
 

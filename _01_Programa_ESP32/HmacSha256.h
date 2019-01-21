@@ -2,25 +2,31 @@
 #define HMACSHA256_H
 
 #include "mbedtls/md.h"
-#include "mbedtls/aes.h"
+
 
 class HmacSha256 {
 	char hash[65];
 	char message[12];
 	char raw_message[65];
 public:
-	char* strComputeHMAC(char* key, char* payload){
+	char* strComputeHMAC(char* key, String strpayload){
 
 		/*Serial.println(key);
 		Serial.println(payload);
 		memset(raw_message, 0, strlen(raw_message));*/
 		//char *raw_message;
+		char * payload;
+	    if(strpayload.length()!=0){
+        	payload = const_cast<char*>(strpayload.c_str());
+        
+    	}
 		byte hmacResult[32];
-
+		Serial.println(payload);
 		mbedtls_md_context_t ctx;
 		mbedtls_md_type_t md_type = MBEDTLS_MD_SHA256;
 
 		size_t payloadLength = strlen(payload);
+		Serial.println(payloadLength);
 		size_t keyLength = strlen(key);            
 		mbedtls_md_init(&ctx);
 		mbedtls_md_setup(&ctx, mbedtls_md_info_from_type(md_type), 1);
@@ -29,12 +35,11 @@ public:
 		mbedtls_md_hmac_finish(&ctx, hmacResult);
 		mbedtls_md_free(&ctx);
 
-		memset(raw_message, 0, strlen(raw_message));
+		//memset(raw_message, 0, strlen(raw_message));
 		for(int i = 0; i< sizeof(hmacResult); i++){
 			char str[3];
 			int x = 0;
 			sprintf(str, "%02x", (int)hmacResult[i]);
-
 			if(i==0){
 				strcpy(raw_message,str);
 
@@ -42,7 +47,7 @@ public:
 			  strcat(raw_message, str);
 			}
 		}
-		// Serial.println(raw_message);
+		Serial.println();
 		return (raw_message);
 
 	}

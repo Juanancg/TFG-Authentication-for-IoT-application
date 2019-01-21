@@ -52,14 +52,15 @@ class MQTTHelper:
 
 
     def on_message_LW(self, client, userdata, message):
-
-        self.strMessageReceived = ""
         print("Mensaje recibido :", str(message.payload.decode("utf-8")))
         strLastWillMsg = str(message.payload.decode("utf-8"))
-        if(strLastWillMsg == 'Bye from ESP32'):
+        if(strLastWillMsg == '1'):
             var = True
-        elif(strLastWillMsg == 'Connected'):
+            print("ESP32 Conectado")
+        elif(strLastWillMsg == '0'):
+            print("ESP32 Desconectado")
             var = False
+
 
     # -----------------------------------------------------------------------------
     # Function that initializes the mqtt connection
@@ -68,6 +69,7 @@ class MQTTHelper:
         # create new instance
         self.client.username_pw_set(self.strUser, password=self.strPassword)  # set username and password
         self.client.on_connect = self.on_connect  # attach function to callback
+        self.client.message_callback_add("esp/LastWill", self.on_message_LW)
         self.client.on_message = self.on_message  # attach function to callback
 
         self.client.connect(self.strBrokerAddress, port=self.sPort)  # connect to broker
@@ -76,7 +78,7 @@ class MQTTHelper:
             print("Waiting for connection")
             time.sleep(0.1)
         self.subscribe("esp/responses")
-        self.subscribe("/esp/LastWill")
+        self.subscribe("esp/LastWill")
         return 1
 
     # -----------------------------------------------------------------------------

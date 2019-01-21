@@ -8,7 +8,7 @@ Coordinator coordinator;
 void dmpDataReady() {
     mpuInterrupt = true;
 }
-
+int num = 0;
 void setup() {
 
   Serial.begin(115200);
@@ -20,9 +20,10 @@ void setup() {
 
 void loop() {
 
+
 	coordinator.waitingMessage();
 	coordinator.mpu_sensor.mpuloop();
-
+	//Serial.println(coordinator.client.get_time());
   
 
 }
