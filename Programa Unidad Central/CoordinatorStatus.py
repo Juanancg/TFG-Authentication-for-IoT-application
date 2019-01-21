@@ -156,7 +156,10 @@ class CoordinatorStatus:
 
     def timeDiff(self, time1, time2):
         timeA = datetime.datetime.strptime(time1, "%H:%M:%S")
-        timeB = datetime.datetime.strptime(time2, "%H:%M:%S")
+        try:
+            timeB = datetime.datetime.strptime(time2, "%H:%M:%S")
+        except ValueError:
+            return 100
         newTime = timeA - timeB
         return newTime.seconds
 

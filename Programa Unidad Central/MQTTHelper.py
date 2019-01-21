@@ -91,7 +91,8 @@ class MQTTHelper:
     # Function to publish a message in a topic
     # -----------------------------------------------------------------------------
     def send_message(self, message):
-        str_message_to_send = hmacSha256.prepare_msg(message, 'secretKey')
+        messageTime = message + time.strftime("%H:%M:%S")
+        str_message_to_send = hmacSha256.prepare_msg(messageTime, 'secretKey')
         print(str_message_to_send)
         print(self.client.publish("esp/order", str_message_to_send))
         return 1  # TODO - Retornar TRUE o FALSE en funcion si ha podido envair el mensaje o no (Mirar paho)

@@ -180,25 +180,36 @@ class Coordinator {
 			String hmacAndMsg (crypto.strComputeHMAC(key, messageJSON));
 			hmacAndMsg = hmacAndMsg + messageJSON;
 			client.MQTTClient.publish("esp/responses",hmacAndMsg.c_str());
-			/*char * hmacAndMsg = crypto.strComputeHMAC(key,timemsg);
-			hmacAndMsg = strcat(hmacAndMsg, timemsg);
-			char * messageToSend = strcat(client.get_time(), hmacAndMsg);
-			client.MQTTClient.publish("esp/responses", strcat(crypto.strComputeHMAC(key, messageToSend), messageToSend));*/
 			Serial.println("Mensaje de STATUS enviado");
 		}
 
 		void sendOpennedMessage(){
-			client.MQTTClient.publish("esp/responses", strcat(crypto.strComputeHMAC(key, "OPEN"), "OPEN"));
+			String timemsg = client.get_time();
+			String messageOpen = "OPEN";
+			messageOpen = messageOpen + timemsg;
+			String hmacAndMsg (crypto.strComputeHMAC(key, messageOpen));
+			hmacAndMsg = hmacAndMsg + messageOpen;
+			client.MQTTClient.publish("esp/responses",hmacAndMsg.c_str());
 			Serial.println("Mensaje de OPEN enviado");
 		}
 
 		void sendClosedMessage(){
-			client.MQTTClient.publish("esp/responses", strcat(crypto.strComputeHMAC(key, "CLOSED"), "CLOSED"));
-			Serial.println("Mensaje de OPEN enviado");
+			String timemsg = client.get_time();
+			String messageClose = "CLOSE";
+			messageClose = messageClose + timemsg;
+			String hmacAndMsg (crypto.strComputeHMAC(key, messageClose));
+			hmacAndMsg = hmacAndMsg + messageClose;
+			client.MQTTClient.publish("esp/responses",hmacAndMsg.c_str());
+			Serial.println("Mensaje de CLOSE enviado");
 		}
 
 		void sendUnkownMessage(){
-			client.MQTTClient.publish("esp/responses", strcat(crypto.strComputeHMAC(key, "UNKNOWN"), "UNKNOWN"));
+			String timemsg = client.get_time();
+			String messageUnknown = "UNKNOWN";
+			messageUnknown = messageUnknown + timemsg;
+			String hmacAndMsg (crypto.strComputeHMAC(key, messageUnknown));
+			hmacAndMsg = hmacAndMsg + messageUnknown;
+			client.MQTTClient.publish("esp/responses",hmacAndMsg.c_str());
 			Serial.println("Mensaje de UNKNOWN enviado");
 		}
 
