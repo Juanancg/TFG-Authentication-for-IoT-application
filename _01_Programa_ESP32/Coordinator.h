@@ -66,7 +66,7 @@ class Coordinator {
     	*	\brief Function that get the values of the components of the system and composes a JSON msg
     	*	\return JSON message 
     	***************************************************************************************************/ 
-		char * strGetValuesComposeJSON(){
+		String strGetValuesComposeJSON(){
   		    
   		    memset(JSONmessageBuffer, 0, strlen(JSONmessageBuffer));
 			StaticJsonBuffer<300> JSONbuffer;
@@ -96,7 +96,8 @@ class Coordinator {
 			JSONStatus["STATUS"] = JSONStatusContent;
 
 			JSONStatus.printTo(JSONmessageBuffer, sizeof(JSONmessageBuffer));
-			return(JSONmessageBuffer);
+			String strJSON(JSONmessageBuffer);
+			return(strJSON);
 		}
     	
 		void waitingMessage(){
@@ -166,19 +167,19 @@ class Coordinator {
 			String timemsg = client.get_time();
 			String messagePing = "PING";
 			messagePing = messagePing + timemsg;
-			Serial.println(messagePing);
 			String hmacAndMsg (crypto.strComputeHMAC(key, messagePing));
-			Serial.println(hmacAndMsg);
 			hmacAndMsg = hmacAndMsg + messagePing;
-			Serial.println(hmacAndMsg);
 			client.MQTTClient.publish("esp/responses",hmacAndMsg.c_str());
 			Serial.println("Mensaje de PING enviado");
 		}
 
 		void sendStatusMessage(){
-			char * messageJSON = strGetValuesComposeJSON();
-			char * timemsg /*= client.get_time()*/;
-			timemsg = strcat(timemsg, messageJSON);
+			String messageJSON = strGetValuesComposeJSON();
+			String timemsg = client.get_time();
+			messageJSON = messageJSON + timemsg;
+			String hmacAndMsg (crypto.strComputeHMAC(key, messageJSON));
+			hmacAndMsg = hmacAndMsg + messageJSON;
+			client.MQTTClient.publish("esp/responses",hmacAndMsg.c_str());
 			/*char * hmacAndMsg = crypto.strComputeHMAC(key,timemsg);
 			hmacAndMsg = strcat(hmacAndMsg, timemsg);
 			char * messageToSend = strcat(client.get_time(), hmacAndMsg);

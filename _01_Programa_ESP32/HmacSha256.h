@@ -21,12 +21,10 @@ public:
         
     	}
 		byte hmacResult[32];
-		Serial.println(payload);
 		mbedtls_md_context_t ctx;
 		mbedtls_md_type_t md_type = MBEDTLS_MD_SHA256;
 
 		size_t payloadLength = strlen(payload);
-		Serial.println(payloadLength);
 		size_t keyLength = strlen(key);            
 		mbedtls_md_init(&ctx);
 		mbedtls_md_setup(&ctx, mbedtls_md_info_from_type(md_type), 1);
@@ -47,7 +45,6 @@ public:
 			  strcat(raw_message, str);
 			}
 		}
-		Serial.println();
 		return (raw_message);
 
 	}
