@@ -63,6 +63,19 @@ public:
 	    
 	}
 
+	char* strGetOnlyOrder(char* msg_ds){ // ds = digital signature
+
+		memset(message, 0, strlen(message));
+		int longitud = strlen(msg_ds);
+
+		for(int i = 64; i < longitud+1-8 ; i++){
+			message[i-64]=msg_ds[i];
+		} 
+		message[longitud-64-8] = '\0';
+		return(message);
+
+	}
+
 
 	char* get_digital_sig(char* payload1){
 		

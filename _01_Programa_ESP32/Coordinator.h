@@ -133,7 +133,7 @@ class Coordinator {
 					if (bIsOnTime(crypto.strGetMessageFromRaw(client.mensaje_inicial))){
 
 
-						switch(iMessageType(crypto.strGetMessageFromRaw(client.mensaje_inicial))){
+						switch(iMessageType(crypto.strGetOnlyOrder(client.mensaje_inicial))){
 							case 1:
 							// PING CASE
 							    sendPingMessage();
