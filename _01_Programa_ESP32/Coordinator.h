@@ -100,6 +100,28 @@ class Coordinator {
 			return(strJSON);
 		}
     	
+		bool bIsOnTime(char* message){
+			int secondsMsg = client.get_time_in_seconds();
+			String strmsg(message);
+			char buffer[100];
+			int len = strmsg.length();
+
+			if(len<99){
+				strmsg.toCharArray(buffer, strmsg.length()+1);
+				len = len - 8; // To get the position of the time
+				int seconds = ((int(buffer[len])-48)*10 + (int(buffer[len+1])-48))*3600 +((int(buffer[len+3])-48)*10 + (int(buffer[len+4])-48))*60+((int(buffer[len+6])-48)*10 + (int(buffer[len+7])-48));
+				if((secondsMsg - seconds)<60){
+					return true;	
+				} else{
+					return false;
+				}
+
+			} else{
+				return false;
+			}
+
+		}
+
 		void waitingMessage(){
 			client.MQTTClient.loop();
 			// When it receives a message 
@@ -108,31 +130,37 @@ class Coordinator {
 			if(client.flag_msg_recibido){
 				client.flag_msg_recibido = 0;
 				if (crypto.bCheckAuth(key,client.mensaje_inicial)){
-					switch(iMessageType(crypto.strGetMessageFromRaw(client.mensaje_inicial))){
-						case 1:
-						// PING CASE
-						    sendPingMessage();
-						    break;
-					  	case 2:
-					  	// GET STATUS CASE
-						    sendStatusMessage();
-						    break;
-					    case 3:			    	
-					    	if (servo.open()){
-			    				sendOpennedMessage();
-			    			} else{
+					if (bIsOnTime(crypto.strGetMessageFromRaw(client.mensaje_inicial))){
 
-			    			}
-			    			break;
 
-				    	case 4:
-				    		if(servo.close()){
-				    			sendClosedMessage();
-				    		}
-				    		break;
-					  	default:
-						    sendUnkownMessage();
-						    break;
+						switch(iMessageType(crypto.strGetMessageFromRaw(client.mensaje_inicial))){
+							case 1:
+							// PING CASE
+							    sendPingMessage();
+							    break;
+						  	case 2:
+						  	// GET STATUS CASE
+							    sendStatusMessage();
+							    break;
+						    case 3:			    	
+						    	if (servo.open()){
+				    				sendOpennedMessage();
+				    			} else{
+
+				    			}
+				    			break;
+
+					    	case 4:
+					    		if(servo.close()){
+					    			sendClosedMessage();
+					    		}
+					    		break;
+						  	default:
+							    sendUnkownMessage();
+							    break;
+						}
+					} else{
+						Serial.println("Invalid Timestamp");
 					}
 
 				} else{

@@ -85,5 +85,10 @@ class WiFi_MQTT {
 		return /*static_cast<char*>(*/str1/*)*/;
 
     }
+    int get_time_in_seconds(){
+    	int total = 0;
+    	total = (timeClient.getHours()+1)*3600 + timeClient.getMinutes()*60 + timeClient.getSeconds();
+
+    }
 };
     
