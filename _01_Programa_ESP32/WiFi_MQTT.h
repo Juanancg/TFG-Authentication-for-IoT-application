@@ -59,6 +59,7 @@ class WiFi_MQTT {
 		}
 		MQTTClient.setCallback([this] (char* topic, byte* payload, unsigned int length) { this->callback(topic, payload, length); });
 		timeClient.begin();
+		timeClient.update();
     }
 
 

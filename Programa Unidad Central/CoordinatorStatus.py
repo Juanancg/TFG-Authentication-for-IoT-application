@@ -18,31 +18,7 @@ class CoordinatorStatus:
         self.axisYValue = 0.0
         self.axisZValue = 0.0
 
-    def message_reader(self, raw_message):
-        """ Reads the message given and classifies it
-        Args:
-            raw_message: The message to be classifies
 
-        Returns:
-            The define value of the kind of message that has received
-        """
-
-        if raw_message == "PING":
-            return definesValues.MSG_TYPE_PING
-
-        elif raw_message[2:8] == "STATUS": # JSON message at the beginning has {" so the info starts at 2nd char
-            return definesValues.MSG_TYPE_STATUS
-
-        elif raw_message == "CLOSED":
-            return definesValues.MSG_TYPES_CLOSED
-            # TODO - CLOSED MSG
-
-        elif raw_message == "OPEN":
-            return definesValues.MSG_TYPES_OPEN
-            # TODO - OPEN MSG
-
-        else:
-            return 0 # TODO - QUE PASA SI RECIBE MSG DESCONOCIDO
 
 
 
@@ -69,6 +45,7 @@ class CoordinatorStatus:
     # Function that analyzes photodiode value
     # -----------------------------------------------------------------------------
     def analyze_Photodiode_Value(self, value):
+        print(value)
         if value < definesValues.PHOTODIODE_MAX_VALUE:
             return False
         else:
@@ -100,9 +77,9 @@ class CoordinatorStatus:
         strMessageStatusToShow1 = "STATUS: \n"
         strMessageStatusToShow1 = strMessageStatusToShow1 + "Photodiode Value: " + str(self.photodiodeValue)
         if self.analyze_Photodiode_Value(self.photodiodeValue):
-            strMessageStatusToShow1 = strMessageStatusToShow1 + " - Invalid to open the cap"
-        else:
             strMessageStatusToShow1 = strMessageStatusToShow1 + " - Valid to open the cap"
+        else:
+            strMessageStatusToShow1 = strMessageStatusToShow1 + " - Invalid to open the cap"
         strMessageStatusToShow1 = strMessageStatusToShow1 + "\nOpen: " + str(self.fdcOpenValue) + \
                                       "\nClosed: " + str(self.fdcClosedValue) + "\nX Axis: " + \
                                       str(self.axisXValue) + "\nY Axis: " + str(self.axisYValue) + \

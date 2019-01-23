@@ -19,8 +19,8 @@ MSG_TYPES_OPEN   = 4
 # STATUS VALUES
 # -----------------------------------------------------------------------------
 PHOTODIODE_MAX_VALUE = 1000
-ANGLE_X_MAX_VALUE = 200
-ANGLE_Y_MAX_VALUE = 200
+ANGLE_X_MAX_VALUE = 90
+ANGLE_Y_MAX_VALUE = 90
 
 
 # -----------------------------------------------------------------------------

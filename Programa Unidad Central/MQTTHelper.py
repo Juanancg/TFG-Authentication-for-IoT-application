@@ -122,6 +122,33 @@ class MQTTHelper:
     def get_raw_message(self):
         return self.strMessageReceived
 
+
+    def message_reader(self, raw_message):
+        """ Reads the message given and classifies it
+        Args:
+            raw_message: The message to be classifies
+
+        Returns:
+            The define value of the kind of message that has received
+        """
+
+        if raw_message == "PING":
+            return definesValues.MSG_TYPE_PING
+
+        elif raw_message[2:8] == "STATUS": # JSON message at the beginning has {" so the info starts at 2nd char
+            return definesValues.MSG_TYPE_STATUS
+
+        elif raw_message == "CLOSE":
+            return definesValues.MSG_TYPES_CLOSED
+            # TODO - CLOSED MSG
+
+        elif raw_message == "OPEN":
+            return definesValues.MSG_TYPES_OPEN
+            # TODO - OPEN MSG
+
+        else:
+            return 0 # TODO - QUE PASA SI RECIBE MSG DESCONOCIDO
+
     # -----------------------------------------------------------------------------
     # Function to disconnect from the mqtt client
     # -----------------------------------------------------------------------------

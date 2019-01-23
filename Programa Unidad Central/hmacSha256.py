@@ -36,7 +36,7 @@ def get_msg(message):
     msg_len = len(message)
     return message[64:msg_len-8]
 
-# Extract the plain message from the HMAC code + msg
+# Extract the plain time from the HMAC code + msg + time
 # -----------------------------------------------------------------------------
 
 def get_time(message):

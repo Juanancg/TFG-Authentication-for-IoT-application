@@ -17,8 +17,10 @@ class Coordinator {
 		
 		char JSONmessageBuffer[250];
 	    /* WiFi */
-	    const char* ssid = "TP-LINK_F3200A";
-	    const char* password =  "43491896";
+	    /*const char* ssid = "TP-LINK_F3200A";
+	    const char* password =  "43491896";*/
+	    const char* ssid = "AndroidAP";
+	    const char* password =  "holahola";
 	    /* MQTT */
 	    const char* mqttServer = "m20.cloudmqtt.com";
 	    const int   mqttPort = 12834;
@@ -153,6 +155,8 @@ class Coordinator {
 					    	case 4:
 					    		if(servo.close()){
 					    			sendClosedMessage();
+					    		} else{
+					    			
 					    		}
 					    		break;
 						  	default:

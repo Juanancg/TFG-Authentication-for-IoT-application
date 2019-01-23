@@ -24,7 +24,7 @@ class StateMachine:
     # Function to catch user entry and validates it
     # Estado 0
     # -----------------------------------------------------------------------------
-    def user_petition_S0(self, userPetition):
+    def user_petition_S0(self):
         print("Estado 0")
         userPetition = 0
         while not userPetition:
@@ -49,7 +49,7 @@ class StateMachine:
         self.lastState = 0
 
 
-    def pingMessage_S1(self, userPetition):
+    def pingMessage_S1(self):
         """ First state: Send the PING msg
 
         Send PING message to the ESP32 to see if is online
@@ -64,7 +64,7 @@ class StateMachine:
         self.state = 2
 
 
-    def waitForMessage_S2(self, userPetition):
+    def waitForMessage_S2(self):
         """ Second state: Wait for a incoming message
 
         When the message arrives, it checks the authenticity of the message. Then, if its correct, it reads
@@ -100,7 +100,7 @@ class StateMachine:
             if hmacSha256.check_authentication(raw_Message, "secretKey"):
                 if self.coordinatorStatus.bisOnTime(hmacSha256.get_time(raw_Message)):
                     # Check if the message is the expected
-                    if self.coordinatorStatus.message_reader(hmacSha256.get_msg(raw_Message)) == msg_type:
+                    if self.mqtt.message_reader(hmacSha256.get_msg(raw_Message)) == msg_type:
 
                         # Then, depending of the last state, activate the next state
                         # If last state was PING
@@ -140,7 +140,7 @@ class StateMachine:
         self.lastState = 2
 
 
-    def getStatusMessage_S3(self, userPetition):
+    def getStatusMessage_S3(self):
         """ Third state: Send the GETSTATUS msg
 
         Send the get status message
@@ -155,7 +155,7 @@ class StateMachine:
         self.state = 2
 
 
-    def whichPetition_S4(self, userPetition):
+    def whichPetition_S4(self):
         """ Fourth state: Checks the initial user petition
 
         Checks what option has chosen the user and goes to the corresponding state
@@ -165,11 +165,11 @@ class StateMachine:
 
         """
         print("Estado 4")
-        if userPetition == 1:
+        if self.sUserPetition == 1:
             self.state = 5
-        elif userPetition == 2:
+        elif self.sUserPetition == 2:
             self.state = 6
-        elif userPetition == 3:
+        elif self.sUserPetition == 3:
             self.state = 9
         else:
             print("Invalid petition")
@@ -177,7 +177,7 @@ class StateMachine:
         self.lastState = 4
 
 
-    def printStatusMsg_S5(self, userPetition):
+    def printStatusMsg_S5(self):
         """ Fifth state: Prints the Status of the ESp32
 
         The user wants to see the current Status of the ESP32, so this state has the purpose of print it
@@ -193,7 +193,7 @@ class StateMachine:
         self.state = 0
 
 
-    def checkStatusToOpen_S6(self, userPetition):
+    def checkStatusToOpen_S6(self):
         """ Sixth state: Checks the Status of the ESp32
 
         The user wants to open the cap, but the program has to verify if it safe to open
@@ -216,7 +216,7 @@ class StateMachine:
         self.lastState = 6
 
 
-    def sendOpenMessage_S7(self, userPetition):
+    def sendOpenMessage_S7(self):
         """ Seventh state: Send the OPEN msg
 
         Send the OPEN message
@@ -231,7 +231,7 @@ class StateMachine:
         self.state = 2
 
 
-    def printOpenRespone_S8(self, userPetition):
+    def printOpenRespone_S8(self):
         """ Eighth state: Print Open response
 
         Print the response from ESP32 to the OPEN order
@@ -245,7 +245,7 @@ class StateMachine:
         self.state = 0
 
 
-    def checkStatusTClose_S9(self, userPetition):
+    def checkStatusTClose_S9(self):
         """ Ninth state: Checks the Status of the ESP32
 
         The user wants to open the cap, but the program has to verify if it safe to close
@@ -257,9 +257,9 @@ class StateMachine:
         value = self.coordinatorStatus.checkStatus(self.lastStatusMessage, 0)
         if value != -3:
             if value == 1:
-                self.state = 7
+                self.state = 10
             else:
-                print("The conditions make impossible to open the cap")
+                print("The conditions make impossible to close the cap")
                 self.state = 0
         else:
             print("Error - Cant decode JSON message")
@@ -267,7 +267,7 @@ class StateMachine:
         self.lastState = 9
 
 
-    def sendCloseMessage_S10(self, userPetition):
+    def sendCloseMessage_S10(self):
         """ Tenth state: Send the CLOSE msg
 
         Send the CLOSE status message
@@ -282,7 +282,7 @@ class StateMachine:
         self.state = 2
 
 
-    def printCloseRespone_S11(self, userPetition):
+    def printCloseRespone_S11(self):
         """ Eleventh state: Print Close response
 
         Print the response from MQTT to the CLOSE order
@@ -315,4 +315,4 @@ class StateMachine:
             11: self.printCloseRespone_S11
         }
         func = switch.get(self.state, lambda: None)
-        return func(self.sUserPetition)
+        return func()
