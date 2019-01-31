@@ -13,7 +13,7 @@ class MQTTHelper:
         # -----------------------------------------------------------------------------
         # Read and save variables to start MQTT
         data = ""
-        with open("test.txt") as file:
+        with open("config.txt") as file:
             for lines in file:
                 data = lines.split(";")
 
