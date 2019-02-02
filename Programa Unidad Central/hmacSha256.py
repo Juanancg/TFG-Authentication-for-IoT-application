@@ -34,7 +34,15 @@ def prepare_msg(message, key):
 
 def get_msg(message):
     msg_len = len(message)
-    return message[64:msg_len]
+    return message[64:msg_len-8]
+
+# Extract the plain time from the HMAC code + msg + time
+# -----------------------------------------------------------------------------
+
+def get_time(message):
+    msg_len = len(message)
+    return message[msg_len-8:msg_len]
+
 
 
 # Check the authenticity of the message received
@@ -49,8 +57,8 @@ def check_authentication(message, key):
         hash_original = message[0:64]
         msg_original = message[64:msg_len]
         hash_to_compare = make_HMAC(msg_original, key)
-
         if hash_to_compare == hash_original:
-            return 1
+            return True
         else:
-            return 0
+            return False
+

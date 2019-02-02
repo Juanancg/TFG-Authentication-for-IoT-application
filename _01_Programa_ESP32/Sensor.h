@@ -10,9 +10,16 @@ class Sensor{
 		int pin;
 	
 	public: 
-	
+
+    Sensor(){
+      
+    }
+    
+		void set_pin(int x){
+			pin = x;
+		}
+
 		int get_value(){
-			
 			return value;
 		}
 		

@@ -1,55 +1,75 @@
 # -----------------------------------------------------------------------------
 # IMPORTS
 # -----------------------------------------------------------------------------
-import time
-import adapted_mqtt as mqtt
+import CoordinatorStatus as CoordinatorStatusClass
 import hmacSha256 as hmacSha256
+import StateMachine as StateMachine
+import time
 
-Connected = False  # global variable for the state of the connection
+stateMachine = StateMachine.StateMachine()
+while True:
+    stateMachine.StartStateMachine()
+    time.sleep(0.5)
 
 
-# -----------------------------------------------------------------------------
-# Read and save variables to start MQTT
-with open("test.txt") as file:
-    for lines in file:
-        data = lines.split(";")
+"""
+data = "{\"STATUS\":{\"PHOTODIODE\":4095,\"FDC\":{\"FDC_O\":1,\"FDC_C\":0},\"ANGLE\":{\"X_AXIS\":-0.54,\"Y_AXIS\":-0.13,\"Z_AXIS\":0.77}}}"
 
-strBrokerAddress = data[0]
-sPort = int(data[1])
-strUser = data[2]
-strPassword = data[3]
 
-# -----------------------------------------------------------------------------
-# Initialization calls to start MQTT
-mqtt.init_mqtt(strBrokerAddress, sPort, strUser, strPassword)
-while mqtt.Connected:  # Wait for connection
-    time.sleep(0.1)
-print(mqtt.subscribe("esp/responses"))
+coordinator = CoordinatorClass.Coordinator()
+
+# Init MQTT broker
+coordinator.b_init_mqtt()
+try:
+    while 1:
+        coordinator.petition_manager()
+
+except KeyboardInterrupt:
+    print('Desconectado')
+    coordinator.mqtt.disconnect()"""
+
 
 
 # -----------------------------------------------------------------------------
 # Main section
-
+"""
 i = 0
 try:
     while i == 0:
-        strUserPetition = input("1) Get Status \n"
-                              "2) Open the cap \n"
-                              "3) Close the cap \n"
-                              "4) Exit\n")
-        if strUserPetition != "4":  # In the future, change this to switcher, in other class
+        sUserPetition = coordinator.s_user_petition()
 
+        if sUserPetition != "4":  # In the future, change this to switcher, in other class
+            
             if strUserPetition == "1":
                 strPingMsg = hmacSha256.prepare_msg("PING", "secretKey")
                 print(mqtt.publish("esp/order", strPingMsg))
+                print("Waiting for response")
+
+                while not mqtt.bMessageReceived:
+                    print(".")
+                    time.sleep(0.5)
+                strTempMsg = mqtt.strMessageReceived
+                mqtt.bMessageReceived = False
+                if hmacSha256.check_authentication(strTempMsg, "secretKey"):
+                    strMessage = hmacSha256.get_msg(strTempMsg)
+                    if strMessage == "PING":
+                        strStatusMsg = hmacSha256.prepare_msg("Status", "secretKey")
+                        mqtt.publish("esp/order", strStatusMsg)
+                        print("Waiting for response")
+
+                        while not mqtt.bMessageReceived:
+                            print(".")
+                            time.sleep(0.5)
+                        strTempMsg = mqtt.strMessageReceived
+                        mqtt.bMessageReceived = False
 
         else:
             exit()
-        """time.sleep(1)  # para que procese el callback
+        time.sleep(1)  # para que procese el callback
         hmac_main = hmacSha256.prepare_msg('PINGasdas', 'secretKey')
         checked = hmacSha256.check_authentication(hmac_main, 'secretKey1')
         print(hmac_main)
-        print(checked)"""
+        print(checked)
         #  mqtt.publish("esp/order", hmac_main)
         # print(mensaje)
         #  **** AQUI PONER COSAS PARA CUANDO RECIBA MENSAJE
@@ -58,4 +78,4 @@ try:
         # i = 1
 except KeyboardInterrupt:
     print('Desconectado')
-    mqtt.disconnect()
+    mqtt.disconnect()"""
