@@ -42,9 +42,10 @@ class Coordinator {
 	public:
 		MPU_6050 mpu_sensor;
 		WiFi_MQTT client;
+
+
     	/*********************************************FUNCTION******************************************//**
     	*	\brief Function that initializes the coordinator class and objects 
-    	*	\return
     	***************************************************************************************************/
 	    void init(){
 	    	/* Initialites MQTT Client & WiFi */
@@ -60,8 +61,6 @@ class Coordinator {
 			key = "secretKey"; 
 			Serial.println("Cooridnator initialized!");
 	    }
-    
-    
 
 		
        	/*********************************************FUNCTION******************************************//**
@@ -102,6 +101,12 @@ class Coordinator {
 			return(strJSON);
 		}
     	
+
+       	/*********************************************FUNCTION******************************************//**
+    	*	\brief Function that checks if the incoming message has a valid timestamp
+    	*	\param Message without digital signature
+    	*	\return true if is valid, false if not
+    	***************************************************************************************************/ 
 		bool bIsOnTime(char* message){
 			int secondsMsg = client.get_time_in_seconds();
 			String strmsg(message);
@@ -124,6 +129,10 @@ class Coordinator {
 
 		}
 
+
+       	/*********************************************FUNCTION******************************************//**
+    	*	\brief Function that waits for an incoming message and coordinates its reception and response
+    	***************************************************************************************************/ 
 		void waitingMessage(){
 			client.MQTTClient.loop();
 			// When it receives a message 
@@ -134,16 +143,18 @@ class Coordinator {
 				if (crypto.bCheckAuth(key,client.mensaje_inicial)){
 					if (bIsOnTime(crypto.strGetMessageFromRaw(client.mensaje_inicial))){
 
-
 						switch(iMessageType(crypto.strGetOnlyOrder(client.mensaje_inicial))){
-							case 1:
 							// PING CASE
+							case 1:
 							    sendPingMessage();
 							    break;
+
+							// GET STATUS CASE
 						  	case 2:
-						  	// GET STATUS CASE
 							    sendStatusMessage();
 							    break;
+
+					    	// OPEN CASE
 						    case 3:			    	
 						    	if (servo.open()){
 				    				sendOpennedMessage();
@@ -152,6 +163,7 @@ class Coordinator {
 				    			}
 				    			break;
 
+			    			// CLOSE CASE
 					    	case 4:
 					    		if(servo.close()){
 					    			sendClosedMessage();
@@ -159,22 +171,38 @@ class Coordinator {
 					    			
 					    		}
 					    		break;
+
 						  	default:
 							    sendUnkownMessage();
 							    break;
 						}
+
 					} else{
 						Serial.println("Invalid Timestamp");
 					}
 
 				} else{
-
 					Serial.println("El mensaje no es autentico");
 				}
 			}
 
 		}
 
+
+       	/*********************************************FUNCTION******************************************//**
+    	*	\brief Function that check all values after moving the motor
+    	*	\return true if is valid, false if not
+    	***************************************************************************************************/
+		bool bCheckStatus(){
+
+		}
+
+
+       	/*********************************************FUNCTION******************************************//**
+    	*	\brief Function that identifies the typo of message that is introduced as argument
+    	*	\param Message without digital signature and timestamp
+    	*	\return true if is valid, false if not
+    	***************************************************************************************************/ 
 		int iMessageType(char* message){
 			if(strcmp(message,"PING")==0){
         		Serial.println("Tipo de mensaje recibido de Ping");
@@ -195,6 +223,7 @@ class Coordinator {
 			}
 		}
 
+
 		void sendPingMessage(){
 			String timemsg = client.get_time();
 			String messagePing = "PING";
@@ -204,6 +233,7 @@ class Coordinator {
 			client.MQTTClient.publish("esp/responses",hmacAndMsg.c_str());
 			Serial.println("Mensaje de PING enviado");
 		}
+
 
 		void sendStatusMessage(){
 			String messageJSON = strGetValuesComposeJSON();
@@ -215,6 +245,7 @@ class Coordinator {
 			Serial.println("Mensaje de STATUS enviado");
 		}
 
+
 		void sendOpennedMessage(){
 			String timemsg = client.get_time();
 			String messageOpen = "OPEN";
@@ -225,6 +256,7 @@ class Coordinator {
 			Serial.println("Mensaje de OPEN enviado");
 		}
 
+
 		void sendClosedMessage(){
 			String timemsg = client.get_time();
 			String messageClose = "CLOSE";
@@ -234,6 +266,7 @@ class Coordinator {
 			client.MQTTClient.publish("esp/responses",hmacAndMsg.c_str());
 			Serial.println("Mensaje de CLOSE enviado");
 		}
+
 
 		void sendUnkownMessage(){
 			String timemsg = client.get_time();
