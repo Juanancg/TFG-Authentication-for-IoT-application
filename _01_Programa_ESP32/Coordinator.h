@@ -10,6 +10,10 @@
 
 #include <string>
 
+#define PHOTODIODE_MAX_VALUE 1000
+#define X_AXIS_MAX_VALUE 1000
+#define Y_AXIS_MAX_VALUE 1000
+#define SECRET_KEY "secretKey"
 
 class Coordinator {
 
@@ -17,10 +21,10 @@ class Coordinator {
 		
 		char JSONmessageBuffer[250];
 	    /* WiFi */
-	    /*const char* ssid = "TP-LINK_F3200A";
-	    const char* password =  "43491896";*/
-	    const char* ssid = "AndroidAP";
-	    const char* password =  "holahola";
+	    const char* ssid = "TP-LINK_F3200A";
+	    const char* password =  "43491896";
+	    /*const char* ssid = "AndroidAP";
+	    const char* password =  "holahola";*/
 	    /* MQTT */
 	    const char* mqttServer = "m20.cloudmqtt.com";
 	    const int   mqttPort = 12834;
@@ -34,12 +38,12 @@ class Coordinator {
 		/* System Components */
 		
 		Fotodiodo fotodiodo;
-		Servomotor servo; 
 
 		int sdaPin = 26;
 		int sclPin = 25;
 
 	public:
+		Servomotor servo; 
 		MPU_6050 mpu_sensor;
 		WiFi_MQTT client;
 
@@ -58,7 +62,7 @@ class Coordinator {
 	      	fotodiodo.set_pin(36);
 
 			/* Initialites HMAC Key */
-			key = "secretKey"; 
+			key = SECRET_KEY; 
 			Serial.println("Cooridnator initialized!");
 	    }
 
@@ -155,22 +159,30 @@ class Coordinator {
 							    break;
 
 					    	// OPEN CASE
-						    case 3:			    	
-						    	if (servo.open()){
-				    				sendOpennedMessage();
-				    			} else{
+						    case 3:
+						    	if(bCheckStatus(true)){			    	
+							    	if (servo.open()){
+					    				sendOpennedMessage();
+					    			} else{
 
+					    			}
+				    			} else{
+			    					sendInvalidConditionsMessage();
 				    			}
 				    			break;
 
 			    			// CLOSE CASE
 					    	case 4:
-					    		if(servo.close()){
-					    			sendClosedMessage();
-					    		} else{
-					    			
-					    		}
-					    		break;
+						    	if(bCheckStatus(false)){			    	
+							    	if (servo.close()){
+					    				sendClosedMessage();
+					    			} else{
+
+					    			}
+				    			} else{
+			    					sendInvalidConditionsMessage();
+				    			}
+				    			break;
 
 						  	default:
 							    sendUnkownMessage();
@@ -193,8 +205,34 @@ class Coordinator {
     	*	\brief Function that check all values after moving the motor
     	*	\return true if is valid, false if not
     	***************************************************************************************************/
-		bool bCheckStatus(){
+		bool bCheckStatus(bool openOrder){
+			// Checkea los final de carrera
+			Serial.println(servo.sensor_cierre.get_value());
+			if(servo.sensor_apertura.get_value() != openOrder || servo.sensor_cierre.get_value() == openOrder){
 
+				if(openOrder){
+					// Si la orden es abrir, check a los sensores
+					if (fotodiodo.get_value() > PHOTODIODE_MAX_VALUE){
+						float *yawPitchRoll = mpu_sensor.getAngles();
+						if(yawPitchRoll[2] < X_AXIS_MAX_VALUE){
+							Serial.println(yawPitchRoll[2]);
+							return true;
+
+						} else{
+							return false;
+						}
+
+					} else{
+						return false;
+					}
+
+				} else {
+					// Si la orden es cerrar, da igual el valor del resto de valores
+					return true;
+				}
+			} else{
+				return false;
+			}
 		}
 
 
@@ -276,6 +314,16 @@ class Coordinator {
 			hmacAndMsg = hmacAndMsg + messageUnknown;
 			client.MQTTClient.publish("esp/responses",hmacAndMsg.c_str());
 			Serial.println("Mensaje de UNKNOWN enviado");
+		}
+
+		void sendInvalidConditionsMessage(){
+			String timemsg = client.get_time();
+			String messageUnknown = "INVALIDCONDITIONS";
+			messageUnknown = messageUnknown + timemsg;
+			String hmacAndMsg (crypto.strComputeHMAC(key, messageUnknown));
+			hmacAndMsg = hmacAndMsg + messageUnknown;
+			client.MQTTClient.publish("esp/responses",hmacAndMsg.c_str());
+			Serial.println("Mensaje de INVALIDCONDITIONS enviado");
 		}
 
 };

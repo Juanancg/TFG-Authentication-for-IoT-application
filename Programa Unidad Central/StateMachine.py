@@ -25,7 +25,7 @@ class StateMachine:
     # Estado 0
     # -----------------------------------------------------------------------------
     def user_petition_S0(self):
-        print("Estado 0")
+        #print("Estado 0")
         userPetition = 0
         while not userPetition:
             try:
@@ -58,7 +58,7 @@ class StateMachine:
             userPetition: Petition introduced by the Python user
 
         """
-        print("Estado 1")
+        #print("Estado 1")
         self.mqtt.send_message('PING')
         self.lastState = 1
         self.state = 2
@@ -74,7 +74,7 @@ class StateMachine:
         Args:
             userPetition: Petition introduced by the Python user
         """
-        print("Estado 2")
+        #print("Estado 2")
         msg_type = 0
         # Define expected msg in function of the last State
         if self.lastState == 1:
@@ -97,7 +97,7 @@ class StateMachine:
             raw_Message = self.mqtt.get_raw_message()
 
             # Check the authenticity
-            if hmacSha256.check_authentication(raw_Message, "secretKey"):
+            if hmacSha256.check_authentication(raw_Message, definesValues.SECRET_KEY):
                 if self.coordinatorStatus.bisOnTime(hmacSha256.get_time(raw_Message)):
                     # Check if the message is the expected
                     if self.mqtt.message_reader(hmacSha256.get_msg(raw_Message)) == msg_type:
@@ -123,20 +123,33 @@ class StateMachine:
                             self.lastOpenMessage = hmacSha256.get_msg(raw_Message)
                             self.state = 8
 
+                        # If last state was CLOSE
+                        elif self.lastState == 10:
+                            self.lastCloseMessage = hmacSha256.get_msg(raw_Message)
+                            self.state = 11
 
                         else:
                             self.state = 0
+
                     else:
-                        print("Error - No msg expected")
+                        # If receives an Invalid Condition Message
+                        if hmacSha256.get_msg(raw_Message) == "INVALIDCONDITIONS":
+                            print("Node sensor cant not open because invalid conditions")
+                        else:
+                            print("Error - No msg expected")
+
                         self.state = 0
                 else:
                     print("Error - Invalid Timestamp ")
+
             else:
                 print("Error - No authentic")
                 self.state = 0
+
         else:
             print("Error - Timeout")
             self.state = 0
+
         self.lastState = 2
 
 
@@ -149,7 +162,7 @@ class StateMachine:
             userPetition: Petition introduced by the Python user
 
         """
-        print("Estado 3")
+        #print("Estado 3")
         self.mqtt.send_message('GETSTATUS')
         self.lastState = 3
         self.state = 2
@@ -164,7 +177,7 @@ class StateMachine:
             userPetition: Petition introduced by the Python user
 
         """
-        print("Estado 4")
+        #print("Estado 4")
         if self.sUserPetition == 1:
             self.state = 5
         elif self.sUserPetition == 2:
@@ -186,7 +199,7 @@ class StateMachine:
             userPetition: Petition introduced by the Python user
 
         """
-        print("Estado 5")
+        #print("Estado 5")
         print(self.coordinatorStatus.compose_status())
         print(self.lastStatusMessageTime)
         self.lastState = 5
@@ -202,7 +215,7 @@ class StateMachine:
             userPetition: Petition introduced by the Python user
         """
 
-        print("Estado 6")
+        #print("Estado 6")
         value = self.coordinatorStatus.checkStatus(self.lastStatusMessage, 1)
         if value != -3:
             if value:
@@ -225,7 +238,7 @@ class StateMachine:
             userPetition: Petition introduced by the Python user
 
         """
-        print("Estado 7")
+        #print("Estado 7")
         self.mqtt.send_message('OPEN')
         self.lastState = 7
         self.state = 2
@@ -239,7 +252,7 @@ class StateMachine:
         Args:
             userPetition: Petition introduced by the Python user
         """
-        print("Estado 8")
+        #print("Estado 8")
         print("Cap: " + self.lastOpenMessage)
         self.lastState = 8
         self.state = 0
@@ -253,7 +266,7 @@ class StateMachine:
         Args:
             userPetition: Petition introduced by the Python user
         """
-        print("Estado 9")
+        #print("Estado 9")
         value = self.coordinatorStatus.checkStatus(self.lastStatusMessage, 0)
         if value != -3:
             if value == 1:
@@ -276,7 +289,7 @@ class StateMachine:
             userPetition: Petition introduced by the Python user
 
         """
-        print("Estado 10")
+        #print("Estado 10")
         self.mqtt.send_message('CLOSE')
         self.lastState = 10
         self.state = 2
@@ -290,7 +303,7 @@ class StateMachine:
         Args:
             userPetition: Petition introduced by the Python user
         """
-        print("Estado 11")
+        #print("Estado 11")
         print("Cap: " + self.lastCloseMessage)
         self.lastState = 11
         self.state = 0

@@ -20,9 +20,11 @@ void setup() {
 
 void loop() {
 
-
+	// coordinator.servo.myservo.write(50);
 	coordinator.waitingMessage();
 	coordinator.mpu_sensor.mpuloop();
+	// Serial.println(coordinator.servo.sensor_apertura.get_value());
+	
 	//Serial.println(coordinator.client.get_time());
   
 

@@ -92,7 +92,7 @@ class MQTTHelper:
     # -----------------------------------------------------------------------------
     def send_message(self, message):
         messageTime = message + time.strftime("%H:%M:%S")
-        str_message_to_send = hmacSha256.prepare_msg(messageTime, 'secretKey')
+        str_message_to_send = hmacSha256.prepare_msg(messageTime, definesValues.SECRET_KEY)
         print(str_message_to_send)
         print(self.client.publish("esp/order", str_message_to_send))
         return 1  # TODO - Retornar TRUE o FALSE en funcion si ha podido envair el mensaje o no (Mirar paho)
@@ -140,14 +140,14 @@ class MQTTHelper:
 
         elif raw_message == "CLOSE":
             return definesValues.MSG_TYPES_CLOSED
-            # TODO - CLOSED MSG
+
 
         elif raw_message == "OPEN":
             return definesValues.MSG_TYPES_OPEN
-            # TODO - OPEN MSG
+
 
         else:
-            return 0 # TODO - QUE PASA SI RECIBE MSG DESCONOCIDO
+            return 0
 
     # -----------------------------------------------------------------------------
     # Function to disconnect from the mqtt client
