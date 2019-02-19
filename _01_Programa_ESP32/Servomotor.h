@@ -19,13 +19,6 @@ class Servomotor: public Sensor{
   			myservo.setPeriodHertz(50);// Standard 50hz servo
   			myservo.attach(pin, 500, 2500);
 		}
-
-		/*void write(int value_to_move){
-			value = value_to_move;
-			myservo.write(value);
-			//ledcWrite(0, value);
-			Serial.println("He movido el servo");
-		}*/
 		
 		int get_value(){
 		
@@ -43,7 +36,7 @@ class Servomotor: public Sensor{
 
 				while(valor_fca==0 ){
 
-					if ( value < 40){
+					if ( value < 50){
 						break;
 					}
 					valor_fca = sensor_apertura.get_value();

@@ -10,6 +10,9 @@
 
 #include <string>
 
+#define PHOTODIODE_MAX_VALUE 1000
+#define X_AXIS_MAX_VALUE -10
+#define SECRET_KEY "secretKey"
 
 class Coordinator {
 
@@ -17,34 +20,31 @@ class Coordinator {
 		
 		char JSONmessageBuffer[250];
 	    /* WiFi */
-	    /*const char* ssid = "TP-LINK_F3200A";
-	    const char* password =  "43491896";*/
-	    const char* ssid = "AndroidAP";
-	    const char* password =  "holahola";
+	    const char* ssid = "**************";
+	    const char* password =  "**********";
 	    /* MQTT */
-	    const char* mqttServer = "m20.cloudmqtt.com";
-	    const int   mqttPort = 12834;
-	    const char* mqttUser = "rmqewpne";
-	    const char* mqttPassword = "kFlJMJ_jC5pk";
+	    const char* mqttServer = "************";
+	    const int   mqttPort = *********;
+	    const char* mqttUser = "************";
+	    const char* mqttPassword = "************";
     	char *key;
 
-		
-		HmacSha256 crypto;
-		
-		/* System Components */
-		
-		Fotodiodo fotodiodo;
-		Servomotor servo; 
-
+		// Variables para los pines del MPU6050
 		int sdaPin = 26;
 		int sclPin = 25;
-
-	public:
+		
+		/* System Components */
+		HmacSha256 crypto;
+		Fotodiodo fotodiodo;
+		Servomotor servo; 
 		MPU_6050 mpu_sensor;
 		WiFi_MQTT client;
+
+	public:
+
+
     	/*********************************************FUNCTION******************************************//**
     	*	\brief Function that initializes the coordinator class and objects 
-    	*	\return
     	***************************************************************************************************/
 	    void init(){
 	    	/* Initialites MQTT Client & WiFi */
@@ -57,11 +57,9 @@ class Coordinator {
 	      	fotodiodo.set_pin(36);
 
 			/* Initialites HMAC Key */
-			key = "secretKey"; 
+			key = SECRET_KEY; 
 			Serial.println("Cooridnator initialized!");
 	    }
-    
-    
 
 		
        	/*********************************************FUNCTION******************************************//**
@@ -102,6 +100,12 @@ class Coordinator {
 			return(strJSON);
 		}
     	
+
+       	/*********************************************FUNCTION******************************************//**
+    	*	\brief Function that checks if the incoming message has a valid timestamp
+    	*	\param Message without digital signature
+    	*	\return true if is valid, false if not
+    	***************************************************************************************************/ 
 		bool bIsOnTime(char* message){
 			int secondsMsg = client.get_time_in_seconds();
 			String strmsg(message);
@@ -124,6 +128,10 @@ class Coordinator {
 
 		}
 
+
+       	/*********************************************FUNCTION******************************************//**
+    	*	\brief Function that waits for an incoming message and coordinates its reception and response
+    	***************************************************************************************************/ 
 		void waitingMessage(){
 			client.MQTTClient.loop();
 			// When it receives a message 
@@ -134,47 +142,100 @@ class Coordinator {
 				if (crypto.bCheckAuth(key,client.mensaje_inicial)){
 					if (bIsOnTime(crypto.strGetMessageFromRaw(client.mensaje_inicial))){
 
-
 						switch(iMessageType(crypto.strGetOnlyOrder(client.mensaje_inicial))){
-							case 1:
 							// PING CASE
+							case 1:
 							    sendPingMessage();
 							    break;
+
+							// GET STATUS CASE
 						  	case 2:
-						  	// GET STATUS CASE
 							    sendStatusMessage();
 							    break;
-						    case 3:			    	
-						    	if (servo.open()){
-				    				sendOpennedMessage();
-				    			} else{
 
+					    	// OPEN CASE
+						    case 3:
+						    	if(bCheckStatus(true)){			    	
+							    	if (servo.open()){
+					    				sendOpennedMessage();
+					    			} else{
+
+					    			}
+				    			} else{
+			    					sendInvalidConditionsMessage();
 				    			}
 				    			break;
 
+			    			// CLOSE CASE
 					    	case 4:
-					    		if(servo.close()){
-					    			sendClosedMessage();
-					    		} else{
-					    			
-					    		}
-					    		break;
+						    	if(bCheckStatus(false)){			    	
+							    	if (servo.close()){
+					    				sendClosedMessage();
+					    			} else{
+
+					    			}
+				    			} else{
+			    					sendInvalidConditionsMessage();
+				    			}
+				    			break;
+
 						  	default:
 							    sendUnkownMessage();
 							    break;
 						}
+
 					} else{
 						Serial.println("Invalid Timestamp");
 					}
 
 				} else{
-
 					Serial.println("El mensaje no es autentico");
 				}
 			}
 
 		}
 
+
+       	/*********************************************FUNCTION******************************************//**
+    	*	\brief Function that check all values after moving the motor
+    	*	\return true if is valid, false if not
+    	***************************************************************************************************/
+		bool bCheckStatus(bool openOrder){
+			// Checkea los final de carrera
+			Serial.println(servo.sensor_cierre.get_value());
+			if(servo.sensor_apertura.get_value() != openOrder || servo.sensor_cierre.get_value() == openOrder){
+
+				if(openOrder){
+					// Si la orden es abrir, check a los sensores
+					if (fotodiodo.get_value() > PHOTODIODE_MAX_VALUE){
+						float *yawPitchRoll = mpu_sensor.getAngles();
+						if(yawPitchRoll[2] < X_AXIS_MAX_VALUE){
+							Serial.println(yawPitchRoll[2]);
+							return true;
+
+						} else{
+							return false;
+						}
+
+					} else{
+						return false;
+					}
+
+				} else {
+					// Si la orden es cerrar, da igual el valor del resto de valores
+					return true;
+				}
+			} else{
+				return false;
+			}
+		}
+
+
+       	/*********************************************FUNCTION******************************************//**
+    	*	\brief Function that identifies the typo of message that is introduced as argument
+    	*	\param Message without digital signature and timestamp
+    	*	\return true if is valid, false if not
+    	***************************************************************************************************/ 
 		int iMessageType(char* message){
 			if(strcmp(message,"PING")==0){
         		Serial.println("Tipo de mensaje recibido de Ping");
@@ -195,6 +256,7 @@ class Coordinator {
 			}
 		}
 
+
 		void sendPingMessage(){
 			String timemsg = client.get_time();
 			String messagePing = "PING";
@@ -204,6 +266,7 @@ class Coordinator {
 			client.MQTTClient.publish("esp/responses",hmacAndMsg.c_str());
 			Serial.println("Mensaje de PING enviado");
 		}
+
 
 		void sendStatusMessage(){
 			String messageJSON = strGetValuesComposeJSON();
@@ -215,6 +278,7 @@ class Coordinator {
 			Serial.println("Mensaje de STATUS enviado");
 		}
 
+
 		void sendOpennedMessage(){
 			String timemsg = client.get_time();
 			String messageOpen = "OPEN";
@@ -224,6 +288,7 @@ class Coordinator {
 			client.MQTTClient.publish("esp/responses",hmacAndMsg.c_str());
 			Serial.println("Mensaje de OPEN enviado");
 		}
+
 
 		void sendClosedMessage(){
 			String timemsg = client.get_time();
@@ -235,6 +300,7 @@ class Coordinator {
 			Serial.println("Mensaje de CLOSE enviado");
 		}
 
+
 		void sendUnkownMessage(){
 			String timemsg = client.get_time();
 			String messageUnknown = "UNKNOWN";
@@ -243,6 +309,16 @@ class Coordinator {
 			hmacAndMsg = hmacAndMsg + messageUnknown;
 			client.MQTTClient.publish("esp/responses",hmacAndMsg.c_str());
 			Serial.println("Mensaje de UNKNOWN enviado");
+		}
+
+		void sendInvalidConditionsMessage(){
+			String timemsg = client.get_time();
+			String messageUnknown = "INVALIDCONDITIONS";
+			messageUnknown = messageUnknown + timemsg;
+			String hmacAndMsg (crypto.strComputeHMAC(key, messageUnknown));
+			hmacAndMsg = hmacAndMsg + messageUnknown;
+			client.MQTTClient.publish("esp/responses",hmacAndMsg.c_str());
+			Serial.println("Mensaje de INVALIDCONDITIONS enviado");
 		}
 
 };

@@ -1,6 +1,5 @@
 #include "Coordinator.h"
 
-
 /* VARIABLES */
 Coordinator coordinator;
 
@@ -19,11 +18,7 @@ void setup() {
 }
 
 void loop() {
-
-
+	// Bucle que espera a un mensaje y va actualizando el valor del MPU6050
 	coordinator.waitingMessage();
 	coordinator.mpu_sensor.mpuloop();
-	//Serial.println(coordinator.client.get_time());
-  
-
 }
