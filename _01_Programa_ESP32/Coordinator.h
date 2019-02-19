@@ -11,8 +11,7 @@
 #include <string>
 
 #define PHOTODIODE_MAX_VALUE 1000
-#define X_AXIS_MAX_VALUE 1000
-#define Y_AXIS_MAX_VALUE 1000
+#define X_AXIS_MAX_VALUE -10
 #define SECRET_KEY "secretKey"
 
 class Coordinator {
@@ -21,31 +20,27 @@ class Coordinator {
 		
 		char JSONmessageBuffer[250];
 	    /* WiFi */
-	    const char* ssid = "TP-LINK_F3200A";
-	    const char* password =  "43491896";
-	    /*const char* ssid = "AndroidAP";
-	    const char* password =  "holahola";*/
+	    const char* ssid = "**************";
+	    const char* password =  "**********";
 	    /* MQTT */
-	    const char* mqttServer = "m20.cloudmqtt.com";
-	    const int   mqttPort = 12834;
-	    const char* mqttUser = "rmqewpne";
-	    const char* mqttPassword = "kFlJMJ_jC5pk";
+	    const char* mqttServer = "************";
+	    const int   mqttPort = *********;
+	    const char* mqttUser = "************";
+	    const char* mqttPassword = "************";
     	char *key;
 
-		
-		HmacSha256 crypto;
-		
-		/* System Components */
-		
-		Fotodiodo fotodiodo;
-
+		// Variables para los pines del MPU6050
 		int sdaPin = 26;
 		int sclPin = 25;
-
-	public:
+		
+		/* System Components */
+		HmacSha256 crypto;
+		Fotodiodo fotodiodo;
 		Servomotor servo; 
 		MPU_6050 mpu_sensor;
 		WiFi_MQTT client;
+
+	public:
 
 
     	/*********************************************FUNCTION******************************************//**
