@@ -1,7 +1,8 @@
 # TFG Authentication for IoT application
 Python and ESP32 files
 
-El proyecto ha sido probado en la versión 3.6 de Pyhton y la 1.8.3 de Arduino
+El proyecto ha sido probado en la versión 3.6 de Pyhton y la 1.8.3 de Arduino.
+Para lanzar el programa de Python se lanza el scrip "*Programa principal.py*"
 
 
 ## Programación del ESP32:
