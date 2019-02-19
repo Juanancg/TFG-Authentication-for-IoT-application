@@ -45,7 +45,7 @@ Los valores críticos son el valor del fotodiodo y del ángulo del eje X reporta
 	    const char* mqttPassword = "********";
 ```
 
-- Python: Existe un fichero llamado *config.txt* en el cual está diseñado para ser leido en el orden: *mqttServer***;***mqttPort***;***mqttUser***;***mqttPassword*
+- Python: Existe un fichero llamado *config.txt* en el cual está diseñado para ser leido en el orden: *mqttServer*;*mqttPort*;*mqttUser*;*mqttPassword*
 > Cuidado con los **;** ya que señalan las separaciones entre los valores
 
 
