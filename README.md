@@ -2,13 +2,18 @@
 Python and ESP32 files
 
 El proyecto ha sido probado en la versión 3.6 de Pyhton y la 1.8.3 de Arduino.
-Para lanzar el programa de Python se lanza el scrip "*Programa principal.py*"
+
+Para lanzar el programa central, hay que abrir el archivo "*Programa principal.py*" y darle a F5 (Run Module) desde el IDLE de Python 
+
+Para lanzar el nodo sensor, conectar el ESP32 al ordenador, abrir el Arduino IDE previamente configurado y subir el programa (Ver la sección programación del ESP32. Una vez subido, abrir un monitor serial, y observar como se conecta a la WiFi y luego al MQTT. Si tarda mucho en conectarse a la WiFi, darle al botón de reset o volver a subir el programa. Debe tener la alimentación conectada para que se conecte a la WiFi.
 
 
 ## Programación del ESP32:
 La programación del ESP32 se realiza a traves del IDE de Arduino y conectando el ESP32 al ordenador a traves de un cable microusb
 Para la utilización del ESP32 con el IDE de arduino, se debe configurar previamente el entorno. 
 Seguir los pasos del [tutorial oficial][tuto].
+
+Para subir el código al módulo ESP32, debe conectar el ESP32 mediante la conexión USB, darle a "Subir" y **pulsar el botón de boot de la placa**, hasta que vea que el log de arduino que se está subiendo el programa.
 
 
 ## Clave secreta:
