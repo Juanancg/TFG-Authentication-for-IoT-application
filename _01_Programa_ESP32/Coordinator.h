@@ -24,7 +24,7 @@ class Coordinator {
 	    const char* password =  "**********";
 	    /* MQTT */
 	    const char* mqttServer = "************";
-	    const int   mqttPort = *********;
+	    const int   mqttPort = 12345;
 	    const char* mqttUser = "************";
 	    const char* mqttPassword = "************";
     	char *key;
@@ -37,11 +37,11 @@ class Coordinator {
 		HmacSha256 crypto;
 		Fotodiodo fotodiodo;
 		Servomotor servo; 
-		MPU_6050 mpu_sensor;
 		WiFi_MQTT client;
 
 	public:
 
+		MPU_6050 mpu_sensor;
 
     	/*********************************************FUNCTION******************************************//**
     	*	\brief Function that initializes the coordinator class and objects 

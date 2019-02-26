@@ -40,9 +40,7 @@ class WiFi_MQTT {
 			Serial.println("Connecting to MQTT...");
 
 			if (MQTTClient.connect("ESP32Client", mqtt_Usr, mqtt_Pswd,"esp/LastWill",0,1,"0")) {
-
-				Serial.println("connected"); 
-				//client.publish("esp/test1", "ESP32 conectado !"); 
+				Serial.println("connected");  
 			} 
 			else { 
 
@@ -51,6 +49,8 @@ class WiFi_MQTT {
 				delay(2000);
 			}
 		}
+
+		// Management LastWill to know the ESP32 State
 		if(MQTTClient.subscribe("esp/order")){
 			MQTTClient.publish("esp/LastWill",  "1", true );	
 			
@@ -58,11 +58,15 @@ class WiFi_MQTT {
 			MQTTClient.publish("esp/LastWill",  "0", true );	
 		}
 		MQTTClient.setCallback([this] (char* topic, byte* payload, unsigned int length) { this->callback(topic, payload, length); });
+
+		// Starts time management
 		timeClient.begin();
 		timeClient.update();
     }
 
-
+   	/*********************************************FUNCTION******************************************//**
+	*	\brief Function that is called when a message arrives
+	***************************************************************************************************/
     void callback(char* topic, byte* payload, unsigned int length) { 
     	// Clear mensaje_incial
 		memset(mensaje_inicial, 0, strlen(mensaje_inicial));

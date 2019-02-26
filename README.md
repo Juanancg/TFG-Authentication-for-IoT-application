@@ -15,6 +15,13 @@ Seguir los pasos del [tutorial oficial][tuto].
 
 Para subir el código al módulo ESP32, debe conectar el ESP32 mediante la conexión USB, darle a "Subir" y **pulsar el botón de boot de la placa**, hasta que vea que el log de arduino que se está subiendo el programa.
 
+Configuración y selección de la placa en el IDE de Arduino:
+![](https://i.gyazo.com/4c578e4e42fae0252f39a6406d46c9f2.png)
+
+Y la placa exacta es la siguiente:
+
+![](https://i.gyazo.com/f001212bf20133ff305dc2e3d053737a.png)
+
 
 ## Clave secreta:
 La clave secreta utilizada para el cifrado de mensajes debe ser la **MISMA** en ambos sistemas (ESP32 y Python)

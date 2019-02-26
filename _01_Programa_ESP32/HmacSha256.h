@@ -9,16 +9,15 @@ class HmacSha256 {
 	char message[12];
 	char raw_message[65];
 public:
-	char* strComputeHMAC(char* key, String strpayload){
 
-		/*Serial.println(key);
-		Serial.println(payload);
-		memset(raw_message, 0, strlen(raw_message));*/
-		//char *raw_message;
+	/*********************************************FUNCTION******************************************//**
+	*	\brief Compute the HMAC code with the key and the payload as parameters
+	*	\return Message without HMAC
+	***************************************************************************************************/
+	char* strComputeHMAC(char* key, String strpayload){
 		char * payload;
 	    if(strpayload.length()!=0){
         	payload = const_cast<char*>(strpayload.c_str());
-        
     	}
 		byte hmacResult[32];
 		mbedtls_md_context_t ctx;
@@ -32,8 +31,6 @@ public:
 		mbedtls_md_hmac_update(&ctx, (const unsigned char *) payload, payloadLength);
 		mbedtls_md_hmac_finish(&ctx, hmacResult);
 		mbedtls_md_free(&ctx);
-
-		//memset(raw_message, 0, strlen(raw_message));
 		for(int i = 0; i< sizeof(hmacResult); i++){
 			char str[3];
 			int x = 0;
@@ -46,54 +43,59 @@ public:
 			}
 		}
 		return (raw_message);
-
 	}
 
+	/*********************************************FUNCTION******************************************//**
+	*	\brief Function that returns the message without the HMAC code
+	*	\return Message without HMAC
+	***************************************************************************************************/ 
 	char* strGetMessageFromRaw(char* msg_ds){ // ds = digital signature
-		
-		
 		memset(message, 0, strlen(message));
 		int longitud = strlen(msg_ds);
-
 		for(int i = 64; i < longitud+1 ; i++){
 			message[i-64]=msg_ds[i];
 		} 
 		message[longitud-64] = '\0';
 		return(message);
-	    
 	}
 
+	/*********************************************FUNCTION******************************************//**
+	*	\brief Function that returns just the order of the incoming message
+	*	\return Order
+	***************************************************************************************************/  
 	char* strGetOnlyOrder(char* msg_ds){ // ds = digital signature
-
 		memset(message, 0, strlen(message));
 		int longitud = strlen(msg_ds);
-
 		for(int i = 64; i < longitud+1-8 ; i++){
 			message[i-64]=msg_ds[i];
 		} 
 		message[longitud-64-8] = '\0';
 		return(message);
-
 	}
 
-
+	/*********************************************FUNCTION******************************************//**
+	*	\brief Function that returns the HMAC (computed with SHA256) code from a raw message
+	*	\return The HMAC code or 0 if the message lenght is < 65 characters
+	***************************************************************************************************/  
 	char* get_digital_sig(char* payload1){
 		
 		memset(hash, 0, strlen(hash));
 		int longitud = strlen(payload1);
 		if (longitud<65) {
 			return 0;
-
 		} else{
 			for(int i = 0; i < 64; i++){
 				hash[i]=payload1[i];
 			} 
-
 			hash[65]='\0';
 			return(hash);
 		}
 	}
 
+	/*********************************************FUNCTION******************************************//**
+	*	\brief Function that compares two char*
+	*	\return true if they are identical false if not
+	***************************************************************************************************/   
 	bool comparacion(char *primero, char *segundo){
 		for(int i = 0; i < 64; i++){
 			if( primero[i] != segundo[i]) {
